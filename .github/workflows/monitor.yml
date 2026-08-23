@@ -1,0 +1,21 @@
+# GÖREVİ: Sistemi saat başı kendiliğinden çalıştırmak.
+#
+# Bu dosya GitHub'a bir talimattır: "şu sıklıkla şu programı çalıştır".
+# Sayesinde bilgisayarımızın açık olmasına gerek kalmaz.
+#
+# Bu dosya ne yapacak:
+# - Saatte bir kez ana akışı çalıştıracak
+# - Elle de tetiklenebilecek (test için)
+# - Gizli anahtarları GitHub'ın kasasından (Secrets) alacak
+# - Veritabanının turlar arasında kaybolmaması için bir çözüm içerecek
+#
+# Ne zaman yazılacak: Hafta 3, Gün 5-7
+#
+# Henüz yazılmadı - bu dosya şu an sadece bir yer tutucudur.
+# Aşağıdaki satırlar yorum halinde bırakıldı; içerik doldurulduğunda aktif olacak.
+#
+# name: API Sozlesme Denetimi
+# on:
+#   schedule:
+#     - cron: "0 * * * *"
+#   workflow_dispatch:

@@ -1,0 +1,32 @@
+# Bu dosya, hangi dosyaların GitHub'a GÖNDERİLMEYECEĞİNİ söyler.
+# Buradaki her satır bir koruma kuralıdır.
+
+# --- Sırlar (en kritik bölüm) ---
+# Gerçek şifre, token ve API anahtarlarını içeren dosya. Asla depoya girmemeli.
+.env
+.env.local
+
+# --- Sanal ortam ---
+# Bu projeye özel Python kopyası. Binlerce dosyadan oluşur ve
+# her bilgisayarda yeniden kurulabilir, o yüzden depoya gerek yok.
+venv/
+.venv/
+env/
+
+# --- Veritabanı ---
+# Kayıtlı şemalar ve kontrol geçmişi burada tutulacak.
+# Kişisel çalışma verisi olduğu için depoya girmez.
+# İkinci satır, klasörün depoda görünür kalmasını sağlayan işaretçi dosyayı korur.
+data/*
+!data/.gitkeep
+
+# --- Python'un ürettiği geçici dosyalar ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# --- Editör ve işletim sistemi çöpleri ---
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
