@@ -78,12 +78,18 @@ Bunlar Seviye 1 bulgusudur. Kodda aşağıdakilerden herhangi biri varsa raporla
 ## 4. Denetim Süreci
 
 1. `PROJE_YOL_HARITASI.md` dosyasını oku — özellikle Bölüm 2 (kurallar), Bölüm 4 (klasör yapısı), Bölüm 5 (veri modeli), Bölüm 6 (değişiklik tipleri)
-2. Yol haritasının **Bölüm 11 — YAPILANLAR** tablosuna bak: hangi görevler tamamlanmış, bu turda ne denetlenecek
-3. İlgili kodu incele
-4. Bulguları Bölüm 2'deki seviyelere göre sınıflandır
-5. Bölüm 5'teki formatta raporu yaz
+2. **Bölüm 11 — YAPILANLAR** içinden, proje sahibinin sana verdiği görev adına karşılık gelen kaydı bul ve tamamını oku. Bu kayıt senin ana bilgi kaynağındır: yapılan işler, değişen dosyalar, çalıştırılan testler ve atlanan testler orada yazar.
+3. Kaydı okurken özellikle şunlara dikkat et:
+   - **Atlanan testler bölümü** — burada yazan her madde potansiyel bir bulgudur
+   - **Çalıştırılan testler gerçekten anlamlı mı** — her koşulda geçecek boş testler var mı
+   - **Yapılan işler ile yol haritasındaki görev tanımı örtüşüyor mu** — eksik veya fazla var mı
+4. Kayıtta geçen dosyaları repoda incele
+5. Bulguları Bölüm 2'deki seviyelere göre sınıflandır
+6. Bölüm 5'teki formatta raporu yaz
 
-**Kapsam kuralı:** Sadece bu turda tamamlanan görevi denetle. Daha önce onaylanmış ve commit'lenmiş kodu tekrar eleştirme — meğerki yeni kod eski kodda gerçek bir soruna yol açıyor olsun.
+**Kapsam kuralı:** Sadece sana verilen görev adına ait kaydı denetle. Daha önce onaylanmış ve commit'lenmiş kodu tekrar eleştirme — meğerki yeni kod eski kodda gerçek bir soruna yol açıyor olsun.
+
+**Kayıt eksikse:** YAPILANLAR kaydı eksik, belirsiz veya test bölümü boşsa bunu bir **Seviye 1 bulgusu** olarak raporla. Kayıt eksikse denetim güvenilir yapılamaz; kaydın tamamlanmasını iste.
 
 ---
 
@@ -164,11 +170,12 @@ Rapor **düz Türkçe** yazılır ve **kod parçası içermez.** Tek istisna: Se
 Proje sahibi her denetim turunda denetçi ajana şunu verir:
 
 ```
-Bu iki dosyayı oku: DENETCI_AJAN.md ve PROJE_YOL_HARITASI.md
+DENETCI_AJAN.md ve PROJE_YOL_HARITASI.md dosyalarını oku.
 
-Denetlenecek görev: [görev adı]
-Değişen dosyalar: [liste]
-Ana akış ajanının test raporu: [rapor]
+Denetlenecek görev: [YAPILANLAR bölümündeki görev adı]
+
+Bölüm 11'den bu görevin kaydını bul, oku ve ilgili dosyaları incele.
+Sadece bu göreve odaklan, önceki commit'leri tekrar eleştirme.
 
 DENETCI_AJAN.md Bölüm 5'teki formatta rapor yaz.
 Seviye 3 bulguları rapora yazma.

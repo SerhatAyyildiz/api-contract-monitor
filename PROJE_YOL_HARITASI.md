@@ -500,24 +500,115 @@ Zaman yetmezse **bu sırayla** feda edilir:
 
 ## 11. YAPILANLAR — Tamamlanan Görevler Kaydı
 
-> Bu bölüm, denetçi ajanın "neyi denetleyeceğim" sorusuna tek bakışta cevap bulması içindir.
-> Kısa ve kuru tutulur. Anlatı ve gerekçe `ILERLEME.md` dosyasına yazılır, buraya değil.
-> Ana akış ajanı, Kapı 2 (commit) onayı alındıktan sonra bu tabloya satır ekler.
+> **Bu bölüm denetçi ajanın tek bilgi kaynağıdır.** Denetçiye ayrıca test raporu yapıştırılmaz;
+> proje sahibi sadece görev adını verir, denetçi buradan okur.
+> Bu yüzden kayıtlar eksiksiz olmalıdır — burada yazmayan bir test denetlenmemiş sayılır.
+>
+> Anlatı, gerekçe ve "neden böyle yaptık" açıklamaları buraya değil `ILERLEME.md`'ye yazılır.
+> Burası kuru kayıt tutar.
+>
+> **Ne zaman yazılır:** Ana akış ajanı, Kapı 2 (commit) onayı alındıktan hemen sonra yazar.
 
-| # | Görev | Etkilenen dosyalar | Test durumu | Denetçi kararı | Commit | Tarih |
-|---|---|---|---|---|---|---|
-| 1 | *(örnek) API istek modülü* | *src/fetcher.py, config/apis.json* | *Geçti* | *Onaylandı* | *abc1234* | *—* |
+### Kayıt formatı
 
-**Sütun açıklamaları:**
-- **Görev:** Yol haritasındaki hangi adım tamamlandı
-- **Etkilenen dosyalar:** Oluşturulan veya değiştirilen dosyalar
-- **Test durumu:** Geçti / Geçmedi / Kısmen
-- **Denetçi kararı:** Onaylandı / Şartlı onaylandı / Onaylanmadı — şartlı veya onaylanmadıysa yanına tek cümlelik gerekçe
-- **Commit:** Commit hash'inin ilk 7 karakteri
-- **Tarih:** Görev tamamlanma tarihi
+Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karıştırılmaz**, her biri kendi başlığı altında durur. Yeni görev en alta eklenir, eski kayıtlar değiştirilmez.
 
-**Bekleyen düzeltmeler** (denetçi şartlı onay verdiyse buraya yazılır):
-- *(henüz yok)*
+```
+### G[sıra no] — [Görev adı]  (Hafta X, Gün Y)
+
+**Tarih:** [tarih]
+**Commit:** [hash ilk 7 karakter]
+
+**Yapılan işler:**
+- [madde]
+- [madde]
+
+**Oluşturulan/değişen dosyalar:**
+- [dosya yolu] — [tek cümleyle ne yapıyor]
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | [test adı] | [beklenen] | [gerçekleşen] | Geçti / Geçmedi |
+
+**Çalıştırılmayan/atlanan testler:** [varsa liste + gerekçe, yoksa "yok"]
+
+**Denetçi kararı:** [Onaylandı / Şartlı onaylandı / Onaylanmadı] — [şartlıysa tek cümle gerekçe]
+
+**Bekleyen düzeltmeler:** [varsa liste, yoksa "yok"]
+```
+
+### Kurallar
+
+- **Görev adı benzersiz olmalıdır.** İki görev aynı adı taşıyamaz. Proje sahibi denetçiye bu adı vereceği için karışıklık olmamalıdır.
+- **Atlanan testler gizlenmez.** Çalıştırılamayan bir test varsa gerekçesiyle yazılır. Denetçinin en değerli bulgusu genelde budur.
+- **Denetçi kararı sonradan doldurulur.** Kayıt commit anında açılır, denetçi raporu geldikten sonra karar satırı güncellenir.
+- **Eski kayıtlara dokunulmaz.** Bir hata sonradan fark edilirse eski kayıt düzeltilmez; yeni bir kayıt açılıp "G3'teki şu sorun giderildi" şeklinde not düşülür.
+
+---
+
+### Kayıtlar
+
+### G1 — Mimari plan ve klasör yapısının kurulması  (Hafta 1, Gün 3-4)
+
+**Tarih:** 23.08.2026
+**Commit:** b49c6cd
+
+**Yapılan işler:**
+- Python 3.12.10 kuruldu (proje sahibi tarafından), git kimliği ayarlandı (proje sahibi tarafından)
+- Proje klasöründe git deposu başlatıldı — Gün 1-2'de yapılmış sayılan bu adımlar aslında yapılmamıştı, bu turda telafi edildi
+- Bölüm 4'teki klasör yapısı birebir oluşturuldu (5 klasör, 21 dosya)
+- Tüm `src/` modülleri ve `tests/`, `.github/workflows/` dosyaları **yalnızca Türkçe açıklama yorumuyla** açıldı; hiçbirine çalışan kod yazılmadı
+- `.gitignore` yazıldı ve gizli bilgi koruması bozarak test edildi
+- Sanal ortam oluşturuldu, `requirements.txt` üzerinden iki bağımlılık kuruldu
+- Commit atıldıktan sonra mesajda hatalı `@` karakterleri fark edildi; proje sahibinin onayıyla `git commit --amend` ile mesaj düzeltildi (dosya içeriği değişmedi, hash `9b13bc0` → `b49c6cd` oldu)
+
+**Oluşturulan/değişen dosyalar:**
+- `src/__init__.py` — `src` klasörünün bir Python paketi olduğunu belirtir
+- `src/fetcher.py` — (iskelet) API'ye istek atıp yanıtı ve süreyi döndürecek
+- `src/schema.py` — (iskelet) JSON'dan alan→tip haritası çıkaracak
+- `src/comparator.py` — (iskelet) iki şemayı karşılaştıracak, Bölüm 6'daki tipleri tespit edecek
+- `src/storage.py` — (iskelet) SQLite'a yazacak/okuyacak, veriye dokunan tek modül olacak
+- `src/notifier.py` — (iskelet) Telegram bildirimi gönderecek
+- `src/analyzer.py` — (iskelet) LLM ile değişikliği yorumlayacak (Hafta 4)
+- `src/main.py` — (iskelet) tüm modülleri sırayla çağıracak ana akış
+- `tests/test_comparator.py` — (iskelet) karşılaştırma testleri (Hafta 2)
+- `.github/workflows/monitor.yml` — (iskelet, tamamı yorum satırı) saatlik zamanlayıcı (Hafta 3)
+- `config/apis.json` — izlenecek API listesi; şu an boş liste, Gün 5-7'de doldurulacak
+- `data/.gitkeep` — `data/` gitignore'da olduğu için klasörün depoda görünmesini sağlayan boş işaretçi
+- `.gitignore` — `.env`, `venv/`, `data/*`, `__pycache__/` hariç tutulur; `!data/.gitkeep` istisnası var
+- `.env.example` — boş değerli örnek sır dosyası (3 anahtar adı)
+- `requirements.txt` — `requests==2.32.3`, `python-dotenv==1.0.1`
+- `README.md` — iskelet tanıtım, Hafta 4'te doldurulacak
+- `ILERLEME.md` — kod içermeyen ilerleme günlüğü, Kayıt 1 eklendi
+- `TODO.md` — proje sahibinin haftalık not defteri (boş şablon)
+- `BACKLOG.md` — kapsam dışı fikirler (şu an boş, 3 bilinçli kapsam dışı madde listeli)
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Klasör yapısı Bölüm 4 ile uyumlu mu | Eksik veya fazla dosya olmaması | 5 klasör, 21 dosya; listeyle birebir uyumlu | Geçti |
+| 2 | `config/apis.json` ayrıştırılabiliyor mu | Geçerli JSON olarak okunması | Okundu; `apis` listesi 0 elemanlı (bu adımda beklenen) | Geçti |
+| 3 | **Bozarak test:** sahte `.env` git'e sızıyor mu | Takip listesinde görünmemeli | Görünmedi; `.gitignore` içindeki `.env` kuralı engelledi | Geçti |
+| 4 | **Bozarak test:** sahte veritabanı, sahte sanal ortam ve `__pycache__` sızıyor mu | Üçü de görünmemeli | Üçü de görünmedi; sırasıyla `data/*`, `venv/`, `__pycache__/` kuralları engelledi | Geçti |
+| 5 | `data/.gitkeep` istisnası çalışıyor mu | `data/` gizliyken bu dosya görünmeli | Göründü; klasör yapısı depoda korunuyor | Geçti |
+| 6 | Python sürümü yeterli mi | 3.11 veya üstü | 3.12.10 | Geçti |
+| 7 | Sanal ortam ayakta mı ve bağımlılıklar kuruldu mu | `requests` 2.32.3 + `python-dotenv` 1.0.1, yalıtılmış ortamda | Ortam 3.12.10 döndürdü; iki paket de tam sürümüyle kuruldu (+4 alt bağımlılık) | Geçti |
+| 8 | `src` paketi tanınıyor mu | `import src` hatasız çalışmalı | Hatasız; ayrıca `requests`, `dotenv`, `json`, `sqlite3` yüklenebildi | Geçti |
+
+*Not: Yukarıdaki 4. ve 5. testler, gerçek sanal ortam kurulduktan sonra 1090 dosyalık gerçek koşulda tekrarlandı; git'in gördüğü dosya sayısı yine 0 çıktı, takip listesinde yalnızca 21 proje dosyası kaldı.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Hiçbir işlevsel/davranış testi yapılmadı.** Bu adımda bilerek çalışan kod yazılmadı, dolayısıyla test edilecek davranış yoktu. Doğrulananlar yalnızca yapı, ortam ve gizli bilgi korumasıdır.
+- `tests/test_comparator.py` içinde henüz tek bir test yok — dosya sadece açıklama yorumu içeriyor. Gerçek testler Hafta 2, Gün 5-7'de yazılacak.
+- `.github/workflows/monitor.yml` çalıştırılmadı/doğrulanmadı — içeriği tamamen yorum satırı, Hafta 3'te yazılacak.
+- Uzak depoya gönderim (push) denenmedi — bağlantı henüz kurulmadı, ayrıca onay bekliyor.
+
+**Denetçi kararı:** Onaylandı — bloklayıcı bulgu yok. *(Bu karar, Bölüm 11'in eski tablo formatı yürürlükteyken, denetçiye test raporu doğrudan iletilerek alınmıştır; yeni yöntemle yeniden denetlenmedi.)*
+
+**Bekleyen düzeltmeler:**
+- Yerel dalın adı `master`, GitHub varsayılanı ise `main`. Gönderim yapılmadan önce dal adı `main` olarak değiştirilmeli, aksi halde depoda iki ayrı dal oluşur.
+- Uzak depo (`https://github.com/SerhatAyyildiz/api-contract-monitor.git`) henüz bağlanmadı; ilk gönderim yapılmadı.
 
 ---
 
@@ -530,7 +621,7 @@ Bu dosyayı oku: PROJE_YOL_HARITASI.md
 
 Ben Python'a hakim değilim, akış seviyesinde takip ediyorum.
 Şu an Hafta [X], Gün [Y] aşamasındayım.
-Tamamlanan görevler: Bölüm 11'deki YAPILANLAR tablosuna bak
+Tamamlanan görevler: Bölüm 11'deki YAPILANLAR kayıtlarına bak
 
 Bugünkü hedef: [görev]
 
@@ -544,7 +635,7 @@ Kurallar:
 - Test geçmeden commit önerme; onay almadan bir sonraki göreve geçme
 - Kritik/geri alınamaz bir komut gerekiyorsa önce dur, ne olacağını kısaca açıkla ve onayımı al
 - Görev bitince ILERLEME.md'ye kod içermeyen bir kayıt ekle (Bölüm 2.10 formatında)
-- Commit onayı aldıktan sonra Bölüm 11'deki YAPILANLAR tablosuna satır ekle
+- Commit onayı aldıktan sonra Bölüm 11'deki YAPILANLAR bölümüne, oradaki şablona birebir uyan bir kayıt aç (yapılan işler, dosyalar, çalıştırılan VE atlanan testler dahil)
 - Spagetti kod yazma (Bölüm 2.9) — kodu bitirmeden önce o listeyle kendini kontrol et
 - Kapsam dışına çıkma, yeni fikirleri BACKLOG.md'ye yaz
 ```
