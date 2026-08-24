@@ -5,6 +5,44 @@
 
 ---
 
+## Kayıt 4 — Yanıtın yapısını okuyabilen bir sistem
+
+**Tarih:** 24 Ağustos 2026
+**Aşama:** Hafta 2, Gün 1-2
+
+### Ne yaptık
+
+Şimdiye kadar sistem bir adrese bağlanıp veri getirebiliyordu ama getirdiği veriyi anlamıyordu — sadece ham haliyle ekrana yazıyordu. Bu adımda sisteme, gelen verinin **yapısını okuma** yeteneğini kazandırdık: hangi bilgi alanları var, her birinin türü ne.
+
+Kodlamaya başlamadan önce bir tasarım turu yaptık, çünkü burada birkaç zor karar vardı: bir bilgi boşsa ne yapılacak, liste halinde gelen veriler nasıl ele alınacak, iç içe geçmiş bilgi blokları nasıl korunacak. Bu kararları birlikte netleştirdik, sonra kodladık.
+
+### Sistem şimdi ne yapabiliyor
+
+- Gelen bir yanıta bakıp "burada şu bilgiler var, her biri şu türden" diyebiliyor.
+- İç içe geçmiş bilgi bloklarını (bir bilginin içinde başka bilgiler olması) kaybetmeden aynen koruyor.
+- Liste halinde gelen bilgilerde, listenin içindekilerin de ne türden olduğunu anlıyor — liste bir bilgi bloğu içeriyorsa, o bloğun içini de okuyor.
+- Beklenmedik durumlarla karşılaşınca (boş liste, boş blok, hiç veri gelmemesi) çökmüyor, anlamlı bir şekilde "bunu görmedim" diyebiliyor.
+- Bunu gerçek bir adresten alınan canlı veriyle de kanıtladık — önceki haftanın veri çekme parçasıyla sorunsuz birlikte çalıştı.
+
+### Neden böyle yaptık
+
+**Neden bir bilginin doğru/yanlış (evet/hayır) olup olmadığını sayı ile karıştırmamaya özellikle dikkat ettik:** Kullandığımız programlama dilinde doğru/yanlış değerleri, arka planda sayılarla aynı aileden sayılıyor. Bu yüzden dikkatsiz yazılırsa "aktif mi" gibi bir bilgi yanlışlıkla "sayı" olarak etiketlenebilir. Bunu bilerek kontrol ettik ve doğru ayrımın yapıldığını ayrıca kanıtladık.
+
+**Neden liste içindeki bilgi bloklarının da içini okuduk, sadece "burası bir liste" demekle yetinmedik:** Eğer sadece "liste" deseydik, bu listenin içindeki bir bilginin silinmesi veya değişmesi hiç fark edilemezdi — sistemin asıl amacı bu tür değişiklikleri yakalamak olduğu için, bu bilgiyi görmezden gelmek sistemi işlevsiz kılardı.
+
+**Neden bu parçayı, veriyi saklayan veya karşılaştıran parçalardan ayrı tuttuk:** Bu parçanın tek işi "şu an ne görüyorum" sorusuna cevap vermek. "Bu bir değişiklik mi" sorusunu bir sonraki parça soracak. İkisini karıştırsaydık, ileride bir sorun çıktığında hangi parçanın hatalı olduğunu ayırt etmek zorlaşırdı.
+
+**Neden karışık bilgi barındıran bir listede ilk elemanı esas aldık:** Basitlik tercih edildi. Bir listenin içindeki her elemanın farklı türden olması nadir bir durum; bunu ayrıca özel olarak ele almak şu aşamada gereksiz karmaşıklık katardı. İleride ihtiyaç olursa bu genişletilebilir.
+
+### Sırada ne var
+
+Hafta 2'nin devamı:
+
+1. Çıkarılan bu yapı bir yerde saklanmalı — çünkü bir değişikliği fark edebilmek için "önceki hali" elde bulunmalı. Bu, veritabanı katmanının işi.
+2. Ardından projenin kalbi: iki yapıyı karşılaştırıp "şu bilgi silinmiş", "şu bilginin türü değişmiş" gibi tespitler yapan mantık yazılacak.
+
+---
+
 ## Kayıt 3 — Sistemin ilk gerçek işi: dışarıdan veri çekme
 
 **Tarih:** 24 Ağustos 2026

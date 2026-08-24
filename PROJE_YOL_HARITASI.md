@@ -283,34 +283,36 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Hedef:** Bir API'ye istek atıp yanıtını görebilen, versiyon kontrolü kurulmuş bir proje.
 
 #### Gün 1-2: Ortam kurulumu
-- [ ] Python 3.11+ kurulumu, `python --version` ile doğrula
-- [ ] Antigravity kurulumu ve Claude Code ajanı bağlantısı
-- [ ] GitHub'da `api-contract-monitor` reposu oluştur (public)
-- [ ] Yerelde `git clone`, `python -m venv venv`, sanal ortamı aktifleştir
-- [ ] `.gitignore` oluştur (venv, .env, data/, __pycache__ içermeli)
-- [ ] İlk commit: "Proje iskeleti oluşturuldu"
+- [x] Python 3.11+ kurulumu, `python --version` ile doğrula
+- [ ] Antigravity kurulumu ve Claude Code ajanı bağlantısı — *ajan bağlantısı çalışıyor, ancak IDE olarak Antigravity kullanıldığı hiçbir görev kaydında doğrulanmadı; işaretlenmedi*
+- [x] GitHub'da `api-contract-monitor` reposu oluştur (public) — *repo oluşturuldu ve bağlandı (G2); ancak görünürlük ayarının public olduğu doğrulanmadı (G2 atlanan test)*
+- [x] Yerelde `git clone`, `python -m venv venv`, sanal ortamı aktifleştir — *depo klonlanmadı, yerelde başlatılıp sonradan uzağa bağlandı (G1, G2); sanal ortam kuruldu ve sınandı (G1)*
+- [x] `.gitignore` oluştur (venv, .env, data/, __pycache__ içermeli)
+- [x] İlk commit: "Proje iskeleti oluşturuldu" — *G1, `b49c6cd`*
 
 **Ajan modu:** Default / Sonnet
 
 #### Gün 3-4: Mimari planlama
-- [ ] **Plan modunda** (`opusplan`) ajana bu dosyayı okut ve mimari planı çıkarttır
-- [ ] Klasör yapısını oluştur (Bölüm 4'teki gibi)
-- [ ] `requirements.txt` oluştur, `requests` ve `python-dotenv` ekle, kur
-- [ ] Ajanın ürettiği implementation plan artifact'ini oku, anlamadığın yere yorum bırak
+- [x] **Plan modunda** (`opusplan`) ajana bu dosyayı okut ve mimari planı çıkarttır
+- [x] Klasör yapısını oluştur (Bölüm 4'teki gibi)
+- [x] `requirements.txt` oluştur, `requests` ve `python-dotenv` ekle, kur
+- [ ] Ajanın ürettiği implementation plan artifact'ini oku, anlamadığın yere yorum bırak — *proje sahibinin okuma adımı; yapıldığı görev kayıtlarında doğrulanmadı*
 
 **Ajan modu:** Plan modu / `opusplan`
 
 #### Gün 5-7: İlk çalışan script
-- [ ] `config/apis.json` dosyasını oluştur, içine 1 test API'si koy (JSONPlaceholder önerilir)
-- [ ] `src/fetcher.py` yaz: config'i okur, API'ye istek atar, yanıtı ve süreyi döndürür
-- [ ] Ajan scripti çalıştırır, dönen JSON yanıtını sana özetler
-- [ ] `print()` ekleyerek her adımda ne olduğunu izle
-- [ ] Commit: "API istek modülü eklendi"
+- [x] `config/apis.json` dosyasını oluştur, içine 1 test API'si koy (JSONPlaceholder önerilir)
+- [x] `src/fetcher.py` yaz: config'i okur, API'ye istek atar, yanıtı ve süreyi döndürür
+- [x] Ajan scripti çalıştırır, dönen JSON yanıtını sana özetler
+- [ ] `print()` ekleyerek her adımda ne olduğunu izle — *proje sahibinin izleme adımı; modülün gösterim bölümü ekrana yazıyor ama bu madde ayrıca yapılmadı*
+- [x] Commit: "API istek modülü eklendi" — *G3, `022eb4f`*
 
 **Ajan modu:** Default / Sonnet
 
 **Hafta 1 bitiş kriteri (Definition of Done):**
 > Terminalde `python src/fetcher.py` çalıştırdığında bir API'nin JSON yanıtı ekrana yazılıyor, kod GitHub'a push edilmiş durumda.
+
+**✅ HAFTA 1 TAMAMLANDI** — bitiş ölçütü karşılandı (G3, `022eb4f`, uzak depoya gönderildi).
 
 ---
 
@@ -319,10 +321,10 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Hedef:** Sistemin bir değişikliği tespit edebilmesi. Bu haftanın çıktısı projenin en kritik parçası.
 
 #### Gün 1-2: Şema çıkarma tasarımı
-- [ ] **Plan modunda** şema çıkarma yaklaşımını tasarlat (iç içe objeler, diziler, null değerler nasıl ele alınacak)
-- [ ] Planı oku, kabul et
-- [ ] `src/schema.py` yaz: JSON alır, şema (alan → tip haritası) döndürür
-- [ ] Elle test: farklı JSON'lar ver, doğru şema çıkıyor mu bak
+- [x] **Plan modunda** şema çıkarma yaklaşımını tasarlat (iç içe objeler, diziler, null değerler nasıl ele alınacak)
+- [x] Planı oku, kabul et — *plan onaylandı, kodlama onayı verildi*
+- [x] `src/schema.py` yaz: JSON alır, şema (alan → tip haritası) döndürür
+- [x] Elle test: farklı JSON'lar ver, doğru şema çıkıyor mu bak — *G4, 14 test, hepsi geçti*
 
 **Ajan modu:** Plan modu → Default
 
@@ -707,6 +709,56 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 **Bekleyen düzeltmeler:**
 - 5a bulgusu: süre sınırı bağlantı kurulamayacak kadar kısa tutulduğunda durum `timeout` yerine `network_error` olarak etiketleniyor. Denetim bunu engelleyici görmedi ve acil olmadığını belirtti; gerçekçi süre değerlerinde doğru çalıştığı 5b ile kanıtlandı. İleride ele alınmak üzere açık bırakıldı.
+
+---
+
+### G4 — Şema çıkarma modülü  (Hafta 2, Gün 1-2)
+
+**Tarih:** 24.08.2026
+**Commit:** *(bir sonraki commit'te doldurulacak)*
+
+> **Not:** G3'te belirlenen sıra izlendi: bu kayıt denetim turundan **önce** açıldı, çünkü Bölüm 11 denetçinin tek bilgi kaynağı.
+
+**Yapılan işler:**
+- Önce Plan modunda tasarım yapıldı: temel tip etiketleri, null/dizi/iç içe yapı kuralları, kök seviye davranışı, `bool`/`int` tuzağı netleştirildi ve proje sahibi tarafından onaylandı
+- `src/schema.py` yazıldı — G1'de yalnızca açıklama yorumu içeren yer tutucuydu, bu turda çalışan koda dönüştürüldü
+- Beş fonksiyon: `sema_cikar` (dışa açık giriş noktası), `_deger_semasi`, `_obje_semasi`, `_dizi_semasi`, `_temel_tip_adi`
+- Diziler `{"type": "array", "items": ...}` biçiminde tutuluyor; eleman bir nesne ise iç şeması da çıkarılıyor (basit "array" etiketiyle yetinilmedi, çünkü öyle olsaydı comparator dizi içindeki bir alan değişikliğini hiç göremezdi)
+- `bool` değerlerinin yanlışlıkla `integer` sayılmaması için kontrol sırası bilinçli olarak `bool` → `int`'ten önce kuruldu (Python'da bool, int'in alt sınıfı)
+- Kök seviyede liste/`None`/tek bir temel değer gelmesi durumları da çökmeden ele alındı; `sema_cikar` her zaman bir sözlük döndürüyor
+- Dosyanın altına yalnızca doğrudan çalıştırıldığında devreye giren elle-test gösterim bölümü eklendi (5 örnek girdi)
+- Gerçek `fetcher.py` çıktısıyla uçtan uca test yapıldı (canlı bir adresten alınan yanıt üzerinde)
+- Yeni bağımlılık eklenmedi; `requirements.txt` değişmedi
+
+**Oluşturulan/değişen dosyalar:**
+- `src/schema.py` — ham bir JSON değerini alıp alan adı → tip haritası (şema) döndürür; iç içe yapıları ve dizileri destekler
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Düz obje, karışık tipler | Doğru tip haritası | `string`/`integer`/`boolean`/`null` doğru ayrıştı | Geçti |
+| 2 | İç içe obje | Nested yapı korunuyor | `plan` içindeki alanlar aynen çıktı | Geçti |
+| 3 | Dizi — basit tipli | `{"type":"array","items":"integer"}` gibi | Beklenen biçimde | Geçti |
+| 4 | Dizi — obje elemanlı | `items` içinde nested şema | `tags` listesindeki `id`/`name` çıktı | Geçti |
+| 5 | Boş dizi | `items:"unknown"` | Beklenen biçimde | Geçti |
+| 6 | Kök seviyede liste | Sarmalı `{"type":"array",...}` | Beklenen biçimde döndü | Geçti |
+| 7 | Kök seviyede `None` | `{"type":"null"}`, istisna yok | Çökmedi, doğru etiketlendi | Geçti |
+| 8 | **Bozarak:** `True`/`False` içeren obje | `"boolean"`, yanlışlıkla `"integer"` değil | Doğru etiketlendi, ayrıca kod içi `assert` ile doğrulandı | Geçti |
+| 9 | **Bozarak:** tamamen boş obje (`{}`) | Çökmeden boş sözlük | Boş sözlük döndü | Geçti |
+| 10 | **Bozarak:** `float` değer | Ayrı bir tip (`"float"`) | Doğru tanındı | Geçti |
+| 11 | **Bozarak:** karışık tipli dizi | İlk elemanın tipi baz alınır | İlk eleman (`integer`) baz alındı | Geçti |
+| 12 | **Bozarak:** 5 kat iç içe geçmiş yapı | Çökmeden doğru işlenmesi | Sorunsuz işlendi | Geçti |
+| 13 | **Uçtan uca:** gerçek `fetcher.py` çıktısıyla canlı adres yanıtı | Doğru ve eksiksiz şema | `address.geo` dahil tüm iç içe alanlar doğru çıktı | Geçti |
+| 14 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 24 satır, iç içe blok en fazla 1 kat, anlamsız isim yok, modül karışması yok | Geçti |
+
+**Çalıştırılmayan/atlanan testler:**
+- **Otomatik test dosyası yazılmadı.** Tüm testler elle çalıştırıldı. Yol haritasında otomatik testler Hafta 2 Gün 5-7'de comparator ile birlikte yazılıyor.
+- **Kendine referans veren döngüsel yapı denenmedi.** Gerçek bir API yanıtında pratikte oluşmayan teorik bir durum; not olarak bırakıldı.
+- **Çok büyük/uzun bir liste (performans) denenmedi.** Bu adımın kapsamı doğruluk, hız değil.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, şema çıkarma modülünün tamamlandığını ve istenen her senaryoda doğru çalıştığını doğruladı. Otomatik testlerin henüz yazılmamış olması eksiklik sayılmadı; plana göre bunlar bir sonraki adımda karşılaştırma modülüyle birlikte yazılacak.
+
+**Bekleyen düzeltmeler:** yok
 
 ---
 
