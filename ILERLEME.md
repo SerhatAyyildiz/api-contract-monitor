@@ -5,6 +5,54 @@
 
 ---
 
+## Kayıt 3 — Sistemin ilk gerçek işi: dışarıdan veri çekme
+
+**Tarih:** 24 Ağustos 2026
+**Aşama:** Hafta 1, Gün 5-7
+
+### Ne yaptık
+
+Bugüne kadar proje bir iskeletti; hiçbir parçanın içinde çalışan bir şey yoktu. Bu adımda sistemin ilk gerçek işini yazdık: bir internet adresine bağlanıp oradan veri çekmek.
+
+Önce izlenecek ilk adresi belirledik — herkese açık, şifre istemeyen bir deneme servisi seçtik. Sonra bu adrese bağlanan, gelen yanıtı, sunucunun verdiği durum bilgisini ve yanıtın kaç milisaniyede geldiğini geri veren parçayı yazdık.
+
+Kod yazmadan önce "burada ne ters gidebilir" diye bir liste çıkardık ve yedi ayrı aksilik belirledik. Yazarken bu yedi durumun hepsini tek tek karşıladık, sonra da hepsini gerçekten yaşatarak sınadık.
+
+### Sistem şimdi ne yapabiliyor
+
+İlk kez çalıştırılabilir bir program var. Öncekine göre kazanılanlar:
+
+- Belirlenen adrese bağlanıp gerçek veri getirebiliyor ve getirdiğini ekranda okunabilir biçimde gösteriyor.
+- Yanıtın ne kadar sürede geldiğini ölçüyor. Bu ölçüm ileride "bu servis yavaşlamış mı" sorusunu cevaplamak için kullanılacak.
+- Aksilik çıktığında çökmüyor. Bağlantı kurulamazsa, yanıt zamanında gelmezse, sunucu hata verirse, gelen yanıt beklenen biçimde değilse, ayar dosyası bozuksa ya da hiç yoksa — her durumda ne olduğunu anlaşılır biçimde söyleyip düzgünce duruyor.
+- Yeni bir adresi izlemeye almak için koda dokunmak gerekmiyor; ayar dosyasına bir satır eklemek yetiyor.
+
+### Neden böyle yaptık
+
+**Neden veri çeken parça başka hiçbir iş yapmıyor:** Bu parça yalnızca veri getiriyor — getirdiğini yorumlamıyor, saklamıyor, kimseye haber vermiyor. Bunların her biri ayrı parçaların işi olacak. Böyle ayırmasaydık, ileride bir sorun çıktığında "yanıt mı gelmedi, gelen yanıt mı anlaşılmadı, yoksa kaydedilemedi mi" sorusunu ayırt etmek zorlaşırdı.
+
+**Neden her aksilik için ayrı bir karşılama yolu yazdık:** Bu sistemin varlık sebebi zaten aksilikleri fark etmek. Kendisi ilk aksilikte çöken bir izleme sistemi işe yaramaz. Ayrıca aksilikleri birbirinden ayırmak önemli: "bağlanamadım" ile "sunucu hata verdi" farklı şeyler ve ileride farklı tepkiler gerektirecekler.
+
+**Neden aksilikleri gerçekten yaşatarak denedik:** Hata karşılama kodunun yazılmış olması, çalıştığı anlamına gelmiyor. Bu yüzden sırayla var olmayan bir adres verdik, tanınan süreyi kasten yetersiz bıraktık, olmayan bir kaynak istedik, beklenen biçimde olmayan bir yanıt ürettik, ayar dosyasını bozduk ve sildik. Her seferinde sistemin çökmediğini ve doğru şeyi söylediğini gözümüzle gördük.
+
+**Neden bozmadan önce yedek aldık:** Bozarak sınamak faydalı ama ayar dosyasını gerçekten bozmayı gerektiriyordu. Yedek alıp sonunda geri yükledik ve dosyanın ilk haliyle birebir aynı olduğunu ayrıca kanıtladık. Böyle yapmasaydık, testlerden arta kalan bozuk bir ayarın fark edilmeden kalması riski olurdu.
+
+**Bir sınamada beklenmedik bir şey oldu:** Yanıt için tanınan süreyi aşırı kısa tuttuğumuzda — bağlantının kurulmasına bile yetmeyecek kadar — sistem durumu "süre doldu" yerine "bağlanamadım" diye etiketledi. İkisi de bir bakıma doğru, ama biz "süre doldu" bekliyorduk. Gerçekçi bir süreyle tekrar denediğimizde doğru etiketi verdi. Denetim de bunun engelleyici olmadığını, acil olmadığını söyledi. Bu yüzden şimdilik olduğu gibi bıraktık ve kayıt altına aldık.
+
+**Neden şimdilik tek adres izleniyor:** Yol haritası bu aşama için tek adres öngörüyor. Sistem baştan birden fazla adresle çalışacak biçimde yazıldı, ama önce tek adresle her şeyin doğru işlediğinden emin olmak istedik. Adres çoğaltmak sonraki haftalarda sadece ayar dosyasına satır eklemek olacak.
+
+### Sırada ne var
+
+Hafta 1 burada tamamlanıyor. Hafta 2 projenin en kritik bölümü:
+
+1. Gelen yanıtın yapısını çıkaran parça tasarlanacak. Yani "bu yanıtta hangi bilgiler var ve her biri ne türden" sorusunun cevabı. İç içe geçmiş yapılar ve listeler burada özen isteyecek.
+2. Çıkarılan bu yapının saklanması gerekecek, çünkü karşılaştırma ancak "önceki hali" elde varsa mümkün olur.
+3. Ardından projenin kalbi gelecek: iki yapıyı karşılaştırıp neyin değiştiğini bulan parça.
+
+Bu bölüm tasarım kararı gerektirdiği için önce plan çıkarılacak, sonra yazılacak.
+
+---
+
 ## Kayıt 2 — Çalışmanın internete yedeklenmesi
 
 **Tarih:** 23 Ağustos 2026

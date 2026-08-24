@@ -1,3 +1,13 @@
 {
-  "apis": []
+  "apis": [
+    {
+      "id": "jsonplaceholder-user",
+      "name": "JSONPlaceholder Kullanıcı API",
+      "url": "https://jsonplaceholder.typicode.com/users/1",
+      "method": "GET",
+      "headers": {},
+      "timeout": 10,
+      "enabled": true
+    }
+  ]
 }

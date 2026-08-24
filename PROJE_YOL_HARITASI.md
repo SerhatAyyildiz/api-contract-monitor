@@ -653,6 +653,63 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G3 — İlk çalışan veri çekme modülü  (Hafta 1, Gün 5-7)
+
+**Tarih:** 24.08.2026
+**Commit:** *(bir sonraki commit'te doldurulacak)*
+
+> **Not:** Bu kayıt, Bölüm 11'in "commit sonrası yazılır" kuralından farklı olarak denetim turundan **önce** açılmıştır. Gerekçe: aynı bölüm denetçinin tek bilgi kaynağının burası olduğunu söylüyor; kayıt açılmadan denetçinin okuyacağı bir şey olmuyor. Proje sahibinin onayıyla bu sıra tercih edildi.
+
+**Yapılan işler:**
+- `config/apis.json` dolduruldu: tek etkin API tanımı (JSONPlaceholder kullanıcı adresi), Bölüm 5.1 formatına birebir uygun
+- `src/fetcher.py` yazıldı — G1'de yalnızca açıklama yorumu içeren yer tutucuydu, bu turda çalışan koda dönüştürüldü
+- Kodlamadan önce Bölüm 2.6 gereği "ne ters gidebilir" listesi (7 madde) çıkarıldı ve proje sahibi tarafından onaylandı
+- Yedi hata durumunun tamamı için ayrı karşılama yolu eklendi; hiçbiri programı çökertmiyor, her biri durumu belirten aynı yapıda bir sonuç döndürüyor
+- Sonuç yapısındaki durum etiketleri Bölüm 6'daki değişiklik tipleriyle hizalandı (`timeout`, `response_error`, `invalid_json`)
+- Dosyanın altına yalnızca doğrudan çalıştırıldığında devreye giren gösterim bölümü eklendi; Hafta 3'te main.py yazılınca sadeleştirileceği kod içine not düşüldü
+- Bozarak testler için proje dosyalarına kalıcı zarar verilmemesi adına config yedeklendi, testler sonrası parmak izi karşılaştırmasıyla geri yüklendiği doğrulandı
+- Zaman aşımı yolunu gerçekten doğrulamak için geçici bir yerel yavaş sunucu kullanıldı; bu sunucu proje klasörüne değil geçici alana yazıldı, test sonunda durduruldu
+- Yeni bağımlılık eklenmedi; `requirements.txt` değişmedi
+
+**Oluşturulan/değişen dosyalar:**
+- `config/apis.json` — izlenecek API listesi; boş listeydi, tek etkin API tanımı eklendi
+- `src/fetcher.py` — bir API tanımına istek atıp yanıtı, HTTP durum kodunu ve süreyi tek bir sonuç yapısında döndürür; ayrıca config dosyasını okur ve doğrular
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | `config/apis.json` ayrıştırılabiliyor ve 1 etkin API içeriyor mu | Geçerli JSON, 1 etkin kayıt | Okundu, 1 etkin kayıt | Geçti |
+| 2 | `python src/fetcher.py` gerçek yanıt getiriyor mu | Ekranda JSON yanıt | Durum `ok`, HTTP 200, tam JSON yazıldı | Geçti |
+| 3 | Yanıt süresi ölçülüyor mu | Makul milisaniye değeri | 367 ms ve 257 ms (iki ayrı çalıştırma) | Geçti |
+| 4 | **Bozarak:** çözümlenemeyen adres | Çökmeden ağ hatası | `network_error`, adres çözülemedi mesajı | Geçti |
+| 5a | **Bozarak:** 1 milisaniyelik süre sınırı | `timeout` etiketi | Çökmedi ancak `network_error` etiketi geldi | **Kısmen** |
+| 5b | **Bozarak:** yerel yavaş sunucu, 1 saniyelik sınır | `timeout` etiketi | 1014 ms'de `timeout` olarak yakalandı | Geçti |
+| 6 | **Bozarak:** var olmayan kaynak (404) | Çökmeden hata kodu | `response_error`, HTTP 404 raporlandı | Geçti |
+| 7 | **Bozarak:** JSON olmayan düz metin yanıt | Çökmeden ayrıştırma hatası | `invalid_json`, HTTP 200 ile birlikte | Geçti |
+| 8 | **Bozarak:** config bozuk JSON olarak yazıldı | Anlaşılır hata, çıkış kodu 1 | Dosya yolu ve hatalı sütun bildirildi | Geçti |
+| 9 | **Bozarak:** config'de zorunlu adres alanı silindi | Anlaşılır hata | Eksik alanın adı bildirildi | Geçti |
+| 10 | **Bozarak:** config'de liste anahtarı yok | Anlaşılır hata | "liste bulunamadı" bildirildi | Geçti |
+| 11 | **Bozarak:** config dosyası tamamen silindi | Anlaşılır hata | "dosya bulunamadı" bildirildi | Geçti |
+| 12 | Bozma testleri sonrası config eski haline döndü mü | Birebir aynı içerik | Parmak izi aynı, fark yok | Geçti |
+| 13 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 41 satır, iç içe blok en fazla 1 kat, anlamsız isim yok, modül karışması yok | Geçti |
+
+*Not: 5a ve 5b ayrı satırlar olarak tutuldu çünkü ilk deneme beklenen etiketi üretmedi. Süre sınırı bağlantı kurulamayacak kadar kısa tutulduğunda durum `timeout` yerine `network_error` olarak etiketleniyor. Gerçekçi değerlerde (1 saniye ve üzeri) doğru çalıştığı 5b ile kanıtlandı.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Otomatik test dosyası yazılmadı.** Tüm testler elle çalıştırıldı; `tests/` klasörü bu turda hiç değişmedi. Yol haritasında otomatik testler Hafta 2, Gün 5-7'de yazılıyor.
+- **Sunucu tarafı hatası (5xx) ayrıca denenmedi.** 404 ile aynı kod yolundan geçtiği varsayımına dayanıldı; bu varsayım test edilerek doğrulanmadı.
+- **GET dışında bir istek türü denenmedi.** Config'de yalnızca GET tanımlı; diğer metotların çalıştığı gösterilmedi.
+- **Başlık (header) alanı gerçek bir değerle denenmedi.** Şu an boş nesne; kimlik doğrulaması gerektiren bir adres eklendiğinde test edilmeli.
+- **Yavaş yanıt (`slow_response`) tespiti bu adımda yok.** Süre ölçülüyor ancak "fazla yavaş" kararı verilmiyor; bu karar karşılaştırma katmanının işi.
+- **Aynı anda birden fazla API çekme** yalnızca yerel sunucu testinde (2 adres) görüldü, gerçek dış adreslerle çoklu çekim denenmedi.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, sistemin gerçek bir adrese bağlanıp yanıt alabildiğini ve sayılan aksilik durumlarının tamamında çökmeden anlaşılır biçimde durum bildirdiğini doğruladı. 5a bulgusu için: bunun bir hata olmadığı, aşırı kısa süre sınırından kaynaklandığı, ileride daha gerçekçi bir değerle tekrar bakılabileceği ve acil olmadığı belirtildi.
+
+**Bekleyen düzeltmeler:**
+- 5a bulgusu: süre sınırı bağlantı kurulamayacak kadar kısa tutulduğunda durum `timeout` yerine `network_error` olarak etiketleniyor. Denetim bunu engelleyici görmedi ve acil olmadığını belirtti; gerçekçi süre değerlerinde doğru çalıştığı 5b ile kanıtlandı. İleride ele alınmak üzere açık bırakıldı.
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
