@@ -5,6 +5,43 @@
 
 ---
 
+## Kayıt 2 — Çalışmanın internete yedeklenmesi
+
+**Tarih:** 23 Ağustos 2026
+**Aşama:** Hafta 1, Gün 3-4 sonu
+
+### Ne yaptık
+
+Şimdiye kadar yapılan her şey yalnızca bu bilgisayarda duruyordu. Bunu değiştirdik: proje için açılan internet üzerindeki depoya bağlantı kurduk ve tüm çalışmayı oraya gönderdik. Göndermeden önce ana dalın adını, karşı tarafın beklediği isimle aynı olacak şekilde düzelttik; aksi halde dosyalar orada beklenen yerde görünmeyecekti.
+
+Gönderimden önce gizli bilgi kontrolünü üç ayrı katmanda tekrarladık. Sadece "şu an ne gidiyor" diye bakmakla yetinmedik, geçmişin tamamını da taradık.
+
+### Sistem şimdi ne yapabiliyor
+
+Sistem hâlâ bir iş yapmıyor, ama önemli bir güvence kazanıldı:
+
+- Çalışmanın tamamı artık ikinci bir yerde duruyor. Bu bilgisayara bir şey olsa bile proje kaybolmaz.
+- Yapılan işin geçmişi dışarıdan görülebilir durumda — bu proje bir özgeçmiş çalışması olduğu için, düzenli ilerlemenin kaydı da değerli.
+- Gizli bilgi koruması, dışarı açılmadan hemen önce bağımsız olarak yeniden kanıtlandı.
+
+### Neden böyle yaptık
+
+**Neden ilk gönderimden önce dal adını değiştirdik:** Yerel çalışmanın ana kolu ile karşı tarafın varsayılan ana kolu farklı adlar taşıyordu. Bu haliyle gönderilseydi depoda birbirinden habersiz iki ayrı kol oluşurdu; dosyalar açılışta görünmez, sonradan toparlaması can sıkıcı olurdu. Tek bir düzeltmeyle baştan önlendi.
+
+**Neden üç ayrı kontrol yaptık:** Bir erişim anahtarının herkese açık ortama sızması bu projenin en gerçek riski ve geri dönüşü çok zor. Önce hangi dosyaların gittiğine baktık; sonra bu dosyaların içinde şifre görünümlü bir metin var mı diye taradık; son olarak geçmişte herhangi bir anda böyle bir dosyanın girip girmediğini kontrol ettik. Üçü de temiz çıktı. Tek bir kontrolle yetinmek, "dosya listesi temiz ama birinin içine anahtar yapıştırılmış" durumunu kaçırabilirdi.
+
+**Neden şimdi gönderdik, daha sonra değil:** Bir haftalık iş biriktikten sonra ilk yedeği almak gereksiz risk olurdu. Zemin hazırken almak daha ucuz.
+
+### Sırada ne var
+
+Hafta 1'in son bölümü:
+
+1. İzlenecek ilk adres tanımlanacak — herkese açık, kimlik doğrulaması istemeyen bir test adresi.
+2. Sistemin ilk gerçek işi yazılacak: dışarıdan veri çekme. Bu parça bir adrese istek atacak, dönen yanıtı ve yanıtın kaç milisaniyede geldiğini geri verecek.
+3. O adımın sonunda ekranda ilk kez gerçek bir yanıt görülecek. Hafta 1'in bitiş ölçütü budur.
+
+---
+
 ## Kayıt 1 — Proje iskeleti, çalışma ortamı ve güvenlik kalkanı
 
 **Tarih:** 23 Ağustos 2026

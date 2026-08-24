@@ -612,6 +612,47 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G2 — Uzak depo bağlantısı ve ilk gönderim  (Hafta 1, Gün 3-4 sonu)
+
+**Tarih:** 23.08.2026
+**Commit:** `a3ee57d` — bu görevde yeni kod veya dosya değişikliği yapılmadı; uzak depoya gönderilen son kayıt budur.
+
+> **G1'deki bekleyen düzeltmeler bu görevde kapandı:** dal adı `main` olarak değiştirildi ve uzak depo bağlanıp ilk gönderim yapıldı. G1 kaydı, "eski kayıtlara dokunulmaz" kuralı gereği olduğu gibi bırakıldı.
+
+**Yapılan işler:**
+- Yerel ana dalın adı `master` → `main` olarak değiştirildi (geçmiş korundu, iki commit de yerinde)
+- Uzak depo bağlandı: `https://github.com/SerhatAyyildiz/api-contract-monitor.git`
+- Gönderim öncesi altı katmanlı gizli bilgi doğrulaması yapıldı (aşağıdaki tablo)
+- Uzak deponun boş olduğu önceden doğrulandı; çakışma oluşmadı, zorlama (force) komutu kullanılmadı
+- 21 dosya gönderildi; yerel ve uzak birebir aynı duruma geldi
+
+**Oluşturulan/değişen dosyalar:**
+- Dosya içeriği değişmedi. Yalnızca depo ayarları (dal adı, uzak bağlantı) değişti.
+- `ILERLEME.md` — Kayıt 2 eklendi (kod içermeyen ilerleme günlüğü)
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Depoya kayıtlı tüm dosyaların dökümü (geçmiş dahil) | Yalnızca olması gereken dosyalar | 21 dosya, tamamı beklenen listede | Geçti |
+| 2 | `.env` takip ediliyor mu | Hayır | Takip edilmiyor | Geçti |
+| 3 | `venv/` ve `data/monitor.db` takip ediliyor mu | Hayır | İkisi de takip edilmiyor | Geçti |
+| 4 | Geçmişin **herhangi bir anında** bu dosyalar depoya girmiş mi | Hiç girmemiş olmalı | Hiç girmemiş | Geçti |
+| 5 | Kayıtlı dosyaların **içinde** dolu değerli şifre/anahtar satırı var mı | Bulunmamalı | Bulunamadı; Telegram anahtarı formatı da taranıp bulunamadı | Geçti |
+| 6 | `.env.example` değerleri gerçekten boş mu | Üç anahtarın da değeri boş | Üçü de boş | Geçti |
+| 7 | Gönderim sonrası yerel ve uzak eşleşiyor mu | Aynı commit'i göstermeli | İkisi de `a3ee57d` | Geçti |
+
+*Not: 4. test ayrı bir katman olarak yapıldı çünkü bir dosya sonradan silinse bile geçmişte kalır ve oradan okunabilir. 5. test ise "dosya listesi temiz ama bir dosyanın içine anahtar yapıştırılmış" durumunu yakalamak içindir.*
+
+**Çalıştırılmayan/atlanan testler:**
+- Uzak depodaki içerik tarayıcıdan görsel olarak doğrulanmadı; doğrulama git üzerinden yapıldı (uzak dalın dosya listesi ve commit kimliği okundu).
+- GitHub deposunun varsayılan dal ayarı ve görünürlük (public/private) ayarı kontrol edilmedi — bunlar GitHub arayüzünden yönetilir.
+
+**Denetçi kararı:** Denetim turu uygulanmadı — kod değişikliği içermeyen altyapı işi.
+
+**Bekleyen düzeltmeler:** yok
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
