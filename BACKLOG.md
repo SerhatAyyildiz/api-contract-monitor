@@ -15,3 +15,4 @@ _(henüz yok)_
 | Streamlit paneli (tarayıcıda görsel ekran) | Yol haritasında opsiyonel; sadece zaman kalırsa |
 | E-posta / Slack bildirimi | Telegram yeterli; ikinci kanal karmaşıklık ekler |
 | Kimlik doğrulama gerektiren API'ler | Önce herkese açık adreslerle temel sistem oturmalı |
+| `slow_response` tespiti | Referans yanıt süresi `checks` tablosuna henüz yazılmadığı için karşılaştırılacak veri yok. `checks` tablosu doldurulduğunda (muhtemelen `main.py` ile, Hafta 3) `comparator.py`'ye ayrı bir fonksiyon olarak eklenecek. |

@@ -5,6 +5,54 @@
 
 ---
 
+## Kayıt 6 — Sistem artık değişikliği görebiliyor (Hafta 2 tamamlandı)
+
+**Tarih:** 26 Ağustos 2026
+**Aşama:** Hafta 2, Gün 5-7 — **Hafta 2 burada bitti**
+
+### Ne yaptık
+
+Şimdiye kadar sistem bir adrese bağlanıp veri getirebiliyor, getirdiğinin yapısını okuyabiliyor ve bunu hafızasına alabiliyordu. Ama hâlâ yapamadığı tek şey vardı: **iki hali karşılaştırıp "ne değişmiş" diyebilmek.** Bu adımda onu yaptık — projenin var oluş sebebi olan parça.
+
+Kodlamaya başlamadan önce bir tasarım turu yaptık, çünkü burada gerçek bir karar vardı: sistemin yakalaması gereken sekiz durum var, ama bunların yalnızca dördü gerçekten "iki yapıyı karşılaştırmakla" bulunuyor. Diğer dördü (adres hata verdi, yanıt gelmedi, yanıt okunamadı, yanıt yavaştı) aslında bambaşka bir konu — onlar veri getirme aşamasında zaten belli oluyor. Bu ayrımı netleştirip sadece karşılaştırmaya odaklandık.
+
+### Sistem şimdi ne yapabiliyor
+
+Sistem artık bir adresin yapısındaki değişiklikleri **görebiliyor**:
+
+- Bir bilgi alanı kaybolmuşsa fark ediyor ve bunu ciddi bir sorun olarak işaretliyor.
+- Bir alanın türü değişmişse (sayıydı, yazıya dönmüş gibi) yakalıyor, bunu da ciddi sayıyor.
+- Yeni bir alan eklenmişse haber veriyor ama bunu ciddi değil, sadece bilgilendirme olarak işaretliyor.
+- İç içe geçmiş bilgi bloklarının **içindeki** değişiklikleri de aynı netlikte buluyor. "Bir yerlerde bir şey değişti" demiyor; tam olarak hangi alt-alanın değiştiğini adıyla söylüyor.
+- Liste halindeki bilgilerde, listenin içindeki yapı değişse bile fark ediyor.
+- Hiçbir değişiklik yoksa bunu da net biçimde söylüyor — sessiz kalmıyor.
+
+Ayrıca bu mantığın doğruluğunu sürekli kontrol eden 15 otomatik sınama yazıldı. Bundan sonra biri yanlışlıkla bir şeyi bozarsa, anında haberimiz olacak.
+
+### Neden böyle yaptık
+
+**Neden bu parçayı sadece karşılaştırmaya odakladık, sekiz durumun hepsini buraya sıkıştırmadık:** "Adres hata verdi" veya "yanıt gelmedi" bir *karşılaştırma sonucu* değil — bunlar veri getirme aşamasında zaten anlaşılıyor, ortada karşılaştırılacak iki yapı bile yok. Bunları da bu parçaya yüklemek, parçanın iki farklı işi birden yapması demekti. Ayrı tuttuk ki ileride bir sorun çıktığında "karşılaştırma mı yanlış, yoksa veri mi gelmedi" sorusu net cevaplanabilsin.
+
+**Neden iç içe bir alanın içindeki değişikliği "orada bir şey değişti" diye değil, tam adıyla raporluyoruz:** Bir bildirim aldığınızda "plan bilgisinde bir değişiklik var" demek işe yaramaz — hangi alan, ne olmuş, bilmeniz gerekir. Sistem bu yüzden değişikliğin tam yerini adıyla söylüyor. Zaten haftanın hedefi de tam olarak bu netlikteydi.
+
+**Neden yavaş yanıt tespitini şimdilik yapmadık:** Bir yanıtın "yavaş" olduğunu söyleyebilmek için normalde ne kadar sürdüğünü bilmek gerekir. Ama sistem şu an geçmiş yanıt sürelerini hiçbir yerde saklamıyor — karşılaştıracak bir referans yok. Olmayan bir veriyle çalışacak kod yazmak yerine bunu açıkça not düşüp erteledik.
+
+**Bağımsız denetim ne dedi:** Denetim, karşılaştırma mantığının gerçekten çalıştığını ve testlerin gerçek olduğunu (yapay, boş test olmadığını) doğruladı. Bir de haklı bir uyarı bıraktı: ertelenen o dört durumun ileride *gerçekten* yapıldığından emin olunmalı, unutulup gitmemeli. Bunu ciddiye alıp yol haritasının Hafta 3 bölümüne, üzeri çizilmeyi bekleyen iki somut madde olarak ekledik — böylece takip edilmeden geçilmesi mümkün değil.
+
+### Sırada ne var
+
+**Hafta 2 tamamlandı.** Projenin en kritik ve en riskli bölümü artık geride — yol haritası bu haftanın gecikmesi durumunda son haftanın iptal edileceğini söylüyordu, o risk kalktı.
+
+Hafta 3, sistemi gerçekten "canlı" hale getiriyor:
+
+1. Telefona bildirim gönderme yeteneği eklenecek.
+2. Tüm parçaları sırayla çalıştıran bir ana akış yazılacak — bu adımda, yukarıda bahsedilen ertelenmiş dört durum da ele alınacak.
+3. Sistem kendi kendine, saat başı otomatik çalışır hale getirilecek.
+
+Bu hafta bittiğinde proje aslında **tamamlanmış** sayılıyor; son hafta bonus.
+
+---
+
 ## Kayıt 5 — Hafızası olan bir sistem
 
 **Tarih:** 25 Ağustos 2026

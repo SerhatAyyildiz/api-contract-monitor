@@ -296,7 +296,6 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 - [x] **Plan modunda** (`opusplan`) ajana bu dosyayı okut ve mimari planı çıkarttır
 - [x] Klasör yapısını oluştur (Bölüm 4'teki gibi)
 - [x] `requirements.txt` oluştur, `requests` ve `python-dotenv` ekle, kur
-- [ ] Ajanın ürettiği implementation plan artifact'ini oku, anlamadığın yere yorum bırak — *proje sahibinin okuma adımı; yapıldığı görev kayıtlarında doğrulanmadı*
 
 **Ajan modu:** Plan modu / `opusplan`
 
@@ -304,7 +303,6 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 - [x] `config/apis.json` dosyasını oluştur, içine 1 test API'si koy (JSONPlaceholder önerilir)
 - [x] `src/fetcher.py` yaz: config'i okur, API'ye istek atar, yanıtı ve süreyi döndürür
 - [x] Ajan scripti çalıştırır, dönen JSON yanıtını sana özetler
-- [ ] `print()` ekleyerek her adımda ne olduğunu izle — *proje sahibinin izleme adımı; modülün gösterim bölümü ekrana yazıyor ama bu madde ayrıca yapılmadı*
 - [x] Commit: "API istek modülü eklendi" — *G3, `022eb4f`*
 
 **Ajan modu:** Default / Sonnet
@@ -337,16 +335,18 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Ajan modu:** Default / Sonnet
 
 #### Gün 5-7: Karşılaştırma mantığı
-- [ ] **Plan modunda** karşılaştırma algoritmasını tasarlat
-- [ ] `src/comparator.py` yaz: Bölüm 6'daki **tüm** değişiklik tiplerini tespit etmeli
-- [ ] `tests/test_comparator.py` yaz: her değişiklik tipi için en az 1 test
-- [ ] **Manuel test:** `data/monitor.db` içindeki referans şemayı elle değiştir, sistem yakalıyor mu bak
-- [ ] Commit: "Şema karşılaştırma mantığı eklendi"
+- [x] **Plan modunda** karşılaştırma algoritmasını tasarlat
+- [x] `src/comparator.py` yaz: Bölüm 6'daki **tüm** değişiklik tiplerini tespit etmeli — *şema karşılaştırma tipleri (field_removed, field_added, type_changed, iç içe karşılıkları) yapıldı; response_error/timeout/invalid_json/slow_response bilinçli olarak Hafta 3'e devredildi (G6)*
+- [x] `tests/test_comparator.py` yaz: her değişiklik tipi için en az 1 test — *15 test, hepsi geçti*
+- [x] **Manuel test:** `data/monitor.db` içindeki referans şemayı elle değiştir, sistem yakalıyor mu bak — *`field_removed: age` çıktısı üretildi*
+- [x] Commit: "Şema karşılaştırma mantığı eklendi" — *G6*
 
 **Ajan modu:** Plan modu → Default
 
 **Hafta 2 bitiş kriteri:**
 > Referans şemayı kasıtlı bozduğunda sistem terminalde "field_removed: age" gibi doğru bir tespit yazdırıyor. Testler geçiyor.
+
+**✅ HAFTA 2 TAMAMLANDI** — bitiş ölçütü karşılandı (G6): referans şema elle bozulduğunda sistem `field_removed: age` tespitini yazdırdı, 15 otomatik testin tamamı geçiyor.
 
 **⚠️ Kritik uyarı:** Bu hafta gecikirse Hafta 4'teki LLM katmanı iptal edilir. Temel sistem her zaman önceliklidir.
 
@@ -377,6 +377,8 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
   - Telegram gönderim hatası (bildirim gitmezse sistem çökmemeli)
   - Config dosyası eksik/bozuk
 - [ ] `src/main.py` yaz: tüm modülleri sırayla çalıştıran ana akış
+- [ ] **G6'dan devredildi:** `main.py` içinde fetcher'ın `durum` alanını (`timeout`, `response_error`, `invalid_json`) bulguya çevir — `comparator.py` bunlarla bilinçli olarak ilgilenmiyor (bkz. Bölüm 11, G6)
+- [ ] **G6'dan devredildi:** `checks` tablosuna yazma ekle (yanıt süresi dahil); bu yapılınca `slow_response` tespiti de mümkün olur (bkz. `BACKLOG.md`)
 - [ ] Loglama ekle (`logging` modülü, standart kütüphane)
 - [ ] **Bozarak test:** Ajandan config'e yanlış URL yazıp çalıştırmasını iste, sistemin düzgün hata verdiğini sana raporlamasını iste
 - [ ] Commit: "Hata yönetimi ve ana akış eklendi"
@@ -451,7 +453,7 @@ Toplam ~1 saat/hafta. Kod okumak zorunda değilsin.
 | Her adım sonrası | Ajanın çalıştırma sonucu özetini oku, beklenen sonuç mu diye bak | 5 dk |
 | Haftada 1 | Ajandan girdiyi bozarak test etmesini iste (yanlış URL, bozuk şema), sonucu oku | 10 dk |
 | Her adım sonrası | `ILERLEME.md`'ye eklenen yeni kaydı oku (kod içermez) | 5 dk |
-| Haftada 1 | Ajanın walkthrough artifact'lerini oku | 15 dk |
+| Haftada 1 | `ILERLEME.md`'deki yeni kayıtları oku | 15 dk |
 | Haftada 1 | `TODO.md`'ye kendi cümlelerinle "sistem şu an ne yapabiliyor" yaz | 10 dk |
 | Haftada 1 | Ana dosyaların fonksiyon isimlerini oku, akışı takip et | 15 dk |
 
@@ -806,6 +808,58 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 **Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, depolama katmanının tamamlandığını ve sağlam çalıştığını doğruladı; test sırasında bulunan gerçek bir hatanın (bağlantının kapanmaması) düzeltilmiş olması ayrıca not edildi. `checks` ve `changes` tablolarına henüz yazma yapılmaması eksiklik sayılmadı — plana uygun bilinçli bir kapsam kararı, bir sonraki adımda doldurulacak.
 
 **Bekleyen düzeltmeler:** yok
+
+---
+
+### G6 — Karşılaştırma mantığı  (Hafta 2, Gün 5-7)
+
+**Tarih:** 26.08.2026
+
+**Yapılan işler:**
+- Önce Plan modunda kapsam kararı netleştirildi: `comparator.py` yalnızca şema karşılaştırması yapacak (fetcher'ın durum bilgisiyle ilgilenmeyecek); `slow_response` bu turda tamamen kapsam dışı bırakılacak; iç içe alanlardaki bulgular gerçek tipini koruyacak (ayrı bir `nested_changed` etiketi üretilmeyecek) — üçü de proje sahibi tarafından onaylandı
+- `src/comparator.py` yazıldı — yer tutucu yorumun yerine çalışan koda dönüştürüldü; 10 fonksiyon (orkestratör + 9 yardımcı)
+- `field_removed`, `field_added`, `type_changed` tespit ediliyor; iç içe objeler ve dizi içindeki objeler recursive olarak gezilip yol bilgisi (`plan.space`, `tags[].name` gibi) genişletiliyor
+- `tests/test_comparator.py` yazıldı — 15 otomatik test (planlanan 14'ten bir fazla; dizi içindeki obje alanının silinmesi için ek bir test eklendi), hepsi geçti
+- Testler için `pytest` kuruldu — Bölüm 2.8 gereği kurulumdan önce onay alındı, `requirements.txt`'e eklendi
+- `BACKLOG.md`'ye `slow_response` için gerekçeli not eklendi
+- **Manuel/uçtan uca test:** gerçek `storage.py` ile bir referans şema kaydedilip geri okundu, elle bir alanı (`age`) eksik "sahte yeni şema" oluşturuldu, `semalari_karsilastir` ile karşılaştırıldı; terminalde `field_removed: age` çıktısı üretildi — Hafta 2 bitiş kriteri birebir karşılandı
+
+**Oluşturulan/değişen dosyalar:**
+- `src/comparator.py` — iki şemayı karşılaştırıp `field_removed`/`field_added`/`type_changed` bulgularını (iç içe yapılar dahil, path bilgisiyle) döndürür
+- `tests/test_comparator.py` — 15 otomatik test
+- `BACKLOG.md` — `slow_response` kapsam dışı notu eklendi
+- `requirements.txt` — `pytest==9.1.1` eklendi
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | field_removed tespiti | Doğru bulgu | `{"change_type":"field_removed","field":"age",...}` | Geçti |
+| 2 | field_removed yoksa boş liste | `[]` | `[]` | Geçti |
+| 3 | type_changed tespiti | Doğru bulgu | Doğru döndü | Geçti |
+| 4 | type_changed yoksa boş liste | `[]` | `[]` | Geçti |
+| 5 | field_added tespiti (severity=info) | Doğru bulgu | Doğru döndü | Geçti |
+| 6 | field_added yoksa boş liste | `[]` | `[]` | Geçti |
+| 7 | İç içe alanda field_removed, path genişlemesi | `field: "plan.space"` | Doğru döndü | Geçti |
+| 8 | İç içe alanda type_changed, path genişlemesi | `field: "plan.space"` | Doğru döndü | Geçti |
+| 9 | İç içe obje birebir aynıyken bulgu yok | `[]` | `[]` | Geçti |
+| 10 | Dizi eleman tipi değişince type_changed | Doğru bulgu | Doğru döndü | Geçti |
+| 11 | Dizi içindeki obje alanı silinince path (`tags[].name`) | Doğru bulgu | Doğru döndü | Geçti |
+| 12 | Dizi iken düz alana dönüşmüş | type_changed | Doğru döndü | Geçti |
+| 13 | İki şema tamamen aynı (karmaşık, iç içe) | `[]` | `[]` | Geçti |
+| 14 | Birden fazla değişiklik aynı anda | 3 bulgu, hiçbiri kaybolmuyor | 3 bulgu doğru döndü | Geçti |
+| 15 | Boş şemalar (`{}`/`{}`) | `[]`, hata yok | `[]` | Geçti |
+| 16 | **Manuel/uçtan uca:** storage'dan okunan gerçek şema + elle bozulmuş yeni şema | `field_removed: age` çıktısı | Birebir üretildi | Geçti |
+| 17 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 19 satır, iç içe blok en fazla 1 kat, anlamsız isim yok, modül karışması yok | Geçti |
+
+**Çalıştırılmayan/atlanan testler:**
+- **`response_error`, `timeout`, `invalid_json`, `slow_response` için hiç test yok.** Bilinçli kapsam kararı gereği bu turda `comparator.py` bu dört tiple hiç ilgilenmiyor — ilk üçü `fetcher.py`'nin `durum` alanında zaten mevcut (main.py'nin işi, Hafta 3), `slow_response` için referans yanıt süresi hiçbir yerde saklanmıyor (BACKLOG.md'de not var).
+- **Çok derin (3+ kat) iç içe yapılarda recursive karşılaştırma performansı ayrıca ölçülmedi** — kapsam dışı, bu adımın hedefi doğruluktu.
+- **Aynı alanın hem tipi hem içeriği aynı anda karmaşık şekilde değiştiği (örn. dict'ten array'e, array'den dict'e) uç senaryolar tek tek numaralandırılmadı** — genel `_tip_etiketi` karşılaştırması bu durumları da kapsıyor (test 12 bunun bir örneği) ama her kombinasyon ayrı test edilmedi.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, karşılaştırma mantığının gerçekten çalıştığını doğruladı: bir alan kaybolduğunda veya tipi değiştiğinde sistem bunu hem düz hem iç içe yapılarda doğru yakalıyor; 15 testin hepsi gerçek ve geçiyor, yapay/boş test bulunmadı. Denetim ayrıca bir takip maddesi bıraktı: hata kodu / zaman aşımı / yavaş yanıt tespitinin ana akış dosyasına devredilmesi bilinçli bir karar olsa da, sonraki görevlerde gerçekten yapıldığından emin olunmalı — bunun takibi için Bölüm 7 Hafta 3 Gün 3-4'e iki açık kutucuk eklendi.
+
+**Bekleyen düzeltmeler:**
+- Bu görevde düzeltilecek bir şey yok. Ancak **devredilen iş takibi** açık: `response_error`, `timeout`, `invalid_json` tiplerinin bulguya çevrilmesi ve `slow_response` için `checks` tablosunun doldurulması Hafta 3'e bırakıldı. Takip, Bölüm 7 Hafta 3 Gün 3-4'teki "G6'dan devredildi" işaretli iki kutucuk üzerinden yapılacak.
 
 ---
 

@@ -6,3 +6,6 @@ requests==2.32.3
 
 # Gizli bilgileri .env dosyasından okumak için
 python-dotenv==1.0.1
+
+# Otomatik testleri çalıştırmak için
+pytest==9.1.1
