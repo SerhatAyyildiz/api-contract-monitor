@@ -357,13 +357,13 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Hedef:** Sistemin gerçekten otomatik çalışması ve seni bilgilendirmesi.
 
 #### Gün 1-2: Telegram bildirimi
-- [ ] Telegram'da `@BotFather` ile bot oluştur, token al
-- [ ] Kendi chat ID'ni öğren (`@userinfobot` kullanabilirsin)
-- [ ] `.env` dosyasına `TELEGRAM_BOT_TOKEN` ve `TELEGRAM_CHAT_ID` ekle
-- [ ] `.env.example` oluştur (değerler boş, sadece anahtar isimleri)
-- [ ] `src/notifier.py` yaz: mesaj gönderir, mesajı okunabilir biçimde formatlar
-- [ ] Test mesajı gönder, telefonuna geldiğini doğrula
-- [ ] Commit: "Telegram bildirim modülü eklendi"
+- [x] Telegram'da `@BotFather` ile bot oluştur, token al — *proje sahibi tarafından*
+- [x] Kendi chat ID'ni öğren (`@userinfobot` kullanabilirsin) — *proje sahibi tarafından*
+- [x] `.env` dosyasına `TELEGRAM_BOT_TOKEN` ve `TELEGRAM_CHAT_ID` ekle — *proje sahibi tarafından*
+- [x] `.env.example` oluştur (değerler boş, sadece anahtar isimleri) — *G1'de zaten oluşturulmuştu, bu turda güncelliği doğrulandı*
+- [x] `src/notifier.py` yaz: mesaj gönderir, mesajı okunabilir biçimde formatlar
+- [x] Test mesajı gönder, telefonuna geldiğini doğrula — *G7, doğrulandı*
+- [x] Commit: "Telegram bildirim modülü eklendi" — *G7*
 
 **Ajan modu:** Default / Sonnet
 
@@ -860,6 +860,56 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 **Bekleyen düzeltmeler:**
 - Bu görevde düzeltilecek bir şey yok. Ancak **devredilen iş takibi** açık: `response_error`, `timeout`, `invalid_json` tiplerinin bulguya çevrilmesi ve `slow_response` için `checks` tablosunun doldurulması Hafta 3'e bırakıldı. Takip, Bölüm 7 Hafta 3 Gün 3-4'teki "G6'dan devredildi" işaretli iki kutucuk üzerinden yapılacak.
+
+---
+
+### G7 — Telegram bildirim modülü  (Hafta 3, Gün 1-2)
+
+**Tarih:** 26.08.2026
+
+**Yapılan işler:**
+- Proje sahibi tarafından: Telegram'da bot oluşturuldu (BotFather), chat ID öğrenildi, `.env` dosyasına `TELEGRAM_BOT_TOKEN` ve `TELEGRAM_CHAT_ID` eklendi, bot Telegram'dan başlatıldı
+- Önce Plan modunda mesaj biçimi ve hata yönetimi tasarımı netleştirildi: emoji + gruplu düz metin mesaj (Markdown/HTML kullanılmıyor — alan adlarında `_` ve `[]` geçtiği için biçim bozulabilirdi), istisna fırlatmayan sonuç-sözlüğü deseni (`fetcher.py` ile tutarlı)
+- `src/notifier.py` yazıldı — yer tutucu yorumun yerine çalışan koda dönüştürüldü; 8 fonksiyon
+- Bulgular `severity` alanına göre kritik/bilgi olarak gruplanıyor; hiç kritik yoksa başlık emojisi 🟡, varsa 🔴
+- Telegram'ın 4096 karakter sınırı için kırpma mantığı eklendi; kırpılırsa kaç bulgunun gizlendiği mesajda belirtiliyor
+- **Güvenlik önlemi:** Telegram API adresi erişim anahtarını içinde taşıdığı için (`.../bot<TOKEN>/...`), hiçbir hata mesajı ham haliyle döndürülmüyor; `_hatayi_temizle` anahtarı `<gizlendi>` ile değiştiriyor
+- `tests/test_notifier.py` yazıldı (yeni dosya) — 12 otomatik test, GERÇEK Telegram çağrısı yapılmadan (mesaj biçimlendirme saf fonksiyon olarak test edildi, ayar eksikliği `monkeypatch` ile simüle edildi)
+- **Gerçek gönderim testi yapıldı:** örnek bulgularla gerçek bir Telegram mesajı gönderildi, proje sahibi telefonunda gördüğünü doğruladı
+- Yeni bağımlılık eklenmedi; `requests` ve `python-dotenv` zaten kuruluydu
+- `.env` dosyasına hiçbir noktada dokunulmadı, içeriği okunmadı/ekrana yazdırılmadı
+
+**Oluşturulan/değişen dosyalar:**
+- `src/notifier.py` — bulgu listesini okunabilir Telegram mesajına çevirir ve gönderir; hiçbir hatada çökmez
+- `tests/test_notifier.py` — 12 otomatik test (mesaj biçimlendirme + ayar/hata yönetimi)
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Kritik + bilgi karışık bulgular | İki grup da başlıklı görünür | Doğru döndü | Geçti |
+| 2 | Sadece kritik bulgu | BİLGİ başlığı yok | Doğru döndü | Geçti |
+| 3 | Sadece bilgi bulgusu | Başlık emojisi 🟡 | Doğru döndü | Geçti |
+| 4 | `api_id` mesajda geçiyor mu | Görünmeli | Görünüyor | Geçti |
+| 5 | Bulgu `details` metni birebir aktarılıyor mu | Değişmeden geçmeli | Geçti | Geçti |
+| 6 | Boş bulgu listesi | Çökmeden mesaj üretilir | Üretildi | Geçti |
+| 7 | 500 bulgu (uzunluk sınırı testi) | 4096 karakteri aşmaz, not düşülür | Aşmadı, "daha fazlası" notu var | Geçti |
+| 8 | Alan adında `_` ve `[]` geçen bulgu | Bozulmadan geçmeli | Geçti | Geçti |
+| 9 | `TELEGRAM_BOT_TOKEN` eksik | `ayar_eksik`, istisna yok | Doğru döndü | Geçti |
+| 10 | `TELEGRAM_CHAT_ID` eksik | `ayar_eksik`, istisna yok | Doğru döndü | Geçti |
+| 11 | Token boş metin (`""`) | `ayar_eksik` sayılmalı | Doğru döndü | Geçti |
+| 12 | **Güvenlik:** token içeren hata metninin temizlenmesi | Token metinde görünmemeli | `<gizlendi>` ile değiştirildi | Geçti |
+| 13 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 22 satır, iç içe blok en fazla 1 kat, modül karışması yok | Geçti |
+| 14 | **Güvenlik:** `.env` git'e giriyor mu | Kesinlikle girmemeli | Girmedi | Geçti |
+| 15 | **Gerçek gönderim:** telefona test mesajı | Proje sahibi telefonda görmeli | Görüldü, doğrulandı | Geçti |
+| 16 | Tüm test paketi birlikte (27 test) | Hiçbiri bozulmamalı | 27/27 geçti | Geçti |
+
+**Çalıştırılmayan/atlanan testler:**
+- **Gerçek ağ hatası veya Telegram'ın gerçek bir hata kodu döndürmesi denenmedi.** Geçersiz token gibi bir durumu fiilen tetiklemek gereksiz riskti; bu yollar kodun mantığıyla doğrulandı (aynı `requests` deseni `fetcher.py`'de zaten bozarak test edilmişti) ama fiilen tetiklenmedi.
+- **Art arda hızlı çoklu gönderim (Telegram hız sınırlaması) denenmedi** — sistem şu an tek seferde tek bildirim gönderiyor, kapsam dışı.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, bildirim modülünün gerçekten çalıştığını doğruladı; test mesajının telefona ulaştığı ve bağlantı sorunu/eksik ayar gibi durumlarda sistemin çökmeden devam ettiği teyit edildi. Geride kalan iki konu (gerçek bir hata koduyla deneme yapılmaması, art arda gönderim durumu) küçük ve acil değil bulundu.
+
+**Bekleyen düzeltmeler:** yok
 
 ---
 

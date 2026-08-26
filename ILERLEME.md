@@ -5,6 +5,49 @@
 
 ---
 
+## Kayıt 7 — Sistem artık haber verebiliyor
+
+**Tarih:** 26 Ağustos 2026
+**Aşama:** Hafta 3, Gün 1-2
+
+### Ne yaptık
+
+Şimdiye kadar sistem bir değişikliği tespit edebiliyordu ama bunu kimseye söylemiyordu — bulgular yalnızca ekranda kalıyordu. Bu adımda sisteme, bulduğu değişikliği telefona haber verme yeteneği kazandırdık.
+
+Önce sizin tarafınızda birkaç adım tamamlandı: Telegram üzerinde bir bot oluşturuldu, sizin hesabınızın kimliği öğrenildi, bu bilgiler gizli ayar dosyasına yazıldı. Ardından bu bilgileri kullanıp gerçekten mesaj gönderen parçayı yazdık.
+
+Kodlamadan önce mesajın nasıl görüneceğine dair bir tasarım kararı aldık: ciddi olan değişiklikler ile sadece bilgilendirme amaçlı olanlar ayrı gruplarda, renkli bir işaretle gösterilecekti. Böylece telefona bakıldığında bir saniyede "acil bir şey var mı" sorusu cevaplanabilecek.
+
+### Sistem şimdi ne yapabiliyor
+
+- Bir değişiklik tespit ettiğinde artık bunu telefona bildirebiliyor.
+- Bildirimde ciddi olan değişiklikler ile sadece bilgi amaçlı olanlar birbirinden ayrılıyor; hangisinin acil olduğu ilk bakışta anlaşılıyor.
+- Bildirim çok fazla değişiklik içeriyorsa mesajı olması gerekenden uzun tutmuyor, "bunun dışında şu kadar değişiklik daha var" diye özetliyor.
+- Bildirim gönderiminde herhangi bir aksilik olursa (bağlantı sorunu, ayarların eksik olması, Telegram'ın hata vermesi) sistem çökmüyor; sadece gönderemediğini not edip devam ediyor.
+- **Bunu gerçekten sınadık:** örnek bir bildirim gönderildi ve telefona ulaştığı gözle görülerek doğrulandı.
+
+### Neden böyle yaptık
+
+**Neden bildirim gönderen parça, bir aksilik olduğunda sistemi durdurmuyor:** Bir bildirimin gidip gitmemesi, sistemin asıl işini (değişiklik takibini) etkilememeli. Telefon kapalıysa ya da internet o an kesilmişse bile, sistem kontrolüne devam etmeli ve bir sonraki turda yine denemeli. Durması, tek bir aksak bildirim yüzünden bütün takibi durdurmak anlamına gelirdi.
+
+**Neden mesajları ciddi/bilgi diye ikiye ayırdık:** Her değişiklik aynı önemde değil. Bir alanın tamamen kaybolması ile yeni bir alanın eklenmesi çok farklı şeyler — biri uygulamanızı bozabilir, diğeri sadece bilgi niteliğinde. İkisini aynı kefeye koyup tek bir liste halinde göndermek, telefonda bakan kişiyi (sizi) her seferinde bütün listeyi okumaya zorlardı. Ayırınca gerçekten önemli olan öne çıkıyor.
+
+**Neden erişim anahtarının hata mesajlarına karışmamasına özellikle dikkat ettik:** Telefonunuza mesaj göndermek için kullanılan adresin içinde, o adrese özel bir erişim anahtarı geçiyor. Bir hata oluştuğunda, o hatayı açıklayan mesaj genellikle adresin tamamını da içeriyor. Bu mesaj olduğu gibi ekrana yazılsaydı, anahtar da yanlışlıkla görünür olurdu. Bunu fark edip özellikle temizledik ve bunun gerçekten çalıştığını ayrı bir sınamayla kanıtladık — bu proje için gizli bilgi sızıntısı hep en ciddi risk olarak görülüyor.
+
+**Neden mesajı zenginleştirilmiş biçim yerine düz metin olarak gönderdik:** Bazı platformlar mesaj içinde kalın yazı, madde işareti gibi biçimlendirmelere izin verir, ama bunun için mesajın belirli karakterlere (alt çizgi, köşeli parantez gibi) özel anlam yüklemesi gerekir. Bizim değişiklik bulgularımızda bu karakterler zaten doğal olarak geçebiliyor (örneğin bir liste içindeki bir alanın adı). Zenginleştirilmiş biçim kullansaydık, bu karakterler mesajı bozabilir hatta gönderimi tamamen başarısız kılabilirdi. Düz metin bu riski baştan ortadan kaldırdı.
+
+**Bağımsız denetim ne dedi:** Denetim, bildirimin gerçekten çalıştığını ve aksilik durumlarında sistemin çökmediğini doğruladı. İki küçük konuyu (gerçek bir hata koduyla hiç denenmemiş olması, art arda çok sayıda bildirim gönderilmesi durumu) not etti ama bunların acil olmadığını, şimdilik bekletilebileceğini söyledi.
+
+### Sırada ne var
+
+Hafta 3'ün devamı:
+
+1. Şimdiye kadar yazılan tüm parçaları (veri çekme, yapı çıkarma, karşılaştırma, bildirim) sırayla çalıştıran bir ana akış yazılacak. Bu, sistemin tek bir komutla uçtan uca çalışmasını sağlayacak.
+2. Bu adımda, bir önceki bölümde bilerek ertelenmiş birkaç durumun (adresin hata vermesi, yanıtın hiç gelmemesi gibi) nasıl ele alınacağı da netleşecek.
+3. Ardından sistem, insana hiç dokunmadan kendi kendine, düzenli aralıklarla çalışır hale getirilecek.
+
+---
+
 ## Kayıt 6 — Sistem artık değişikliği görebiliyor (Hafta 2 tamamlandı)
 
 **Tarih:** 26 Ağustos 2026
