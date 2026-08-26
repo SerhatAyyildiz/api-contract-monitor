@@ -5,6 +5,47 @@
 
 ---
 
+## Kayıt 5 — Hafızası olan bir sistem
+
+**Tarih:** 25 Ağustos 2026
+**Aşama:** Hafta 2, Gün 3-4
+
+### Ne yaptık
+
+Bir önceki adımda sistem gelen verinin yapısını okuyabiliyordu ama bu bilgiyi hemen unutuyordu — her çalıştırmada sıfırdan başlıyordu. Bu adımda sisteme bir hafıza kazandırdık: okuduğu yapıyı kalıcı olarak saklayabiliyor ve daha sonra geri çağırabiliyor.
+
+Bunun için üç ayrı kayıt defteri hazırladık: biri "her adresin normal hali ne" bilgisini tutacak, diğer ikisi ("her kontrolde ne oldu" ve "hangi değişiklikler yakalandı") bir sonraki adımda dolacak. Şimdilik sadece ilkini kullanıma aldık.
+
+Test ederken beklenmedik bir şey bulduk ve hemen düzelttik — aşağıda anlatıyoruz.
+
+### Sistem şimdi ne yapabiliyor
+
+- Bir adresin yapısını öğrendiğinde bunu kalıcı olarak saklayabiliyor; bilgisayar kapatılıp açılsa bile bu bilgi kaybolmuyor.
+- Aynı adres için daha önce kaydedilmiş bir bilgi varsa onu geri çağırabiliyor.
+- Bir adresin yapısı zamanla değiştiğinde, eski kayıtları silmiyor — üzerine yenisini ekliyor. Böylece ileride "bu adres geçmişte nasıl değişti" sorusu da cevaplanabilecek.
+- Daha önce hiç görmediği bir adres sorulduğunda çökmüyor, düzgünce "bu konuda bir kaydım yok" diyebiliyor.
+- Artık üç parça (adrese bağlanma, yapıyı okuma, hafızaya alma) birlikte, gerçek bir adresle uçtan uca çalışıyor.
+
+### Neden böyle yaptık
+
+**Neden üç kayıt defterinin hepsini şimdiden hazırladık ama ikisini boş bıraktık:** Bir kayıt defterinin yapısını sonradan değiştirmek, baştan doğru kurmaktan çok daha zahmetli. Bu yüzden hepsini şimdiden doğru biçimde hazırladık, ama henüz ihtiyaç duymadığımız ikisine dokunmadık — onlar bir sonraki adımda, karşılaştırma mantığı yazılırken doğal olarak dolacak.
+
+**Neden eski kayıtları silmek yerine üzerine ekliyoruz:** Bir adresin zaman içinde nasıl değiştiğini görebilmek, bu projenin değerli bir yan faydası olabilir. Üstüne yazmak yerine geçmişi biriktirmek, ileride bu soruyu cevaplama imkanını açık tutuyor — ve bunun bedeli neredeyse hiç yok.
+
+**Test sırasında ne bulduk, neden önemliydi:** Sistemin kayıt defterine her bağlandığında bağlantıyı düzgün kapattığını varsaymıştık, ama kasıtlı olarak bozuk bir durum yaratıp denediğimizde, bağlantının tam kapanmadığını fark ettik. Normal kullanımda bu görünmezdi, ama bir sorun anında (örneğin kayıt defteri dosyası bir şekilde bozulursa) sistemin o dosyayı bırakmadan elinde tutmaya devam etmesine yol açabilirdi — bu da üst üste binen ek sorunlara kapı aralardı. Bunu erkenden, gerçek bir soruna dönüşmeden yakaladık ve kaynağında düzelttik. Sonra aynı bozarak testi tekrarlayıp düzeltmenin işe yaradığını ayrıca kanıtladık.
+
+**Neden kayıt defterini bilgisayarın geneline değil, projenin kendi klasörüne koyduk:** Bu proje silinirse geride hiçbir iz kalmaması, kurulduğu ilk günden beri takip ettiğimiz bir ilke. Kayıt defteri dosyası ayrıca dışarı gönderilecek listeye asla girmeyecek şekilde korunuyor — bu üç ayrı yöntemle test edilip doğrulandı, çünkü içinde ileride hassas olabilecek bilgiler birikebilir.
+
+### Sırada ne var
+
+Hafta 2'nin son ve en kritik bölümü:
+
+1. İki yapıyı (eski ve yeni) karşılaştırıp "şu bilgi silinmiş", "şu bilginin türü değişmiş" gibi somut tespitler yapan mantık yazılacak. Bu, projenin asıl var oluş sebebi.
+2. Bu adımda otomatik testler de yazılacak — her tespit türü için en az bir tane.
+3. Bu bölüm bittiğinde Hafta 2 tamamlanmış olacak.
+
+---
+
 ## Kayıt 4 — Yanıtın yapısını okuyabilen bir sistem
 
 **Tarih:** 24 Ağustos 2026

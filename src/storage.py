@@ -4,18 +4,145 @@ GÖREVİ: Verileri kalıcı olarak kaydetmek ve geri okumak.
 Kayıtlar data/monitor.db dosyasında tutulacak. Bu dosya bir veritabanıdır
 (düzenli kayıt tutan, içinde tablolar bulunan tek bir dosya).
 
-Bu dosya ne yapacak - üç tablo yönetecek:
-- Referans şemalar : her API için "normal hali bu" kaydı
-- Kontrol geçmişi  : her turda ne oldu, ne kadar sürdü
-- Değişiklikler    : tespit edilen sapmalar ve yorumları
+Bu dosya üç tablo yönetiyor:
+- schemas : her API için kaydedilen şema geçmişi (bu turda dolduruluyor)
+- checks  : her kontrol turunun kaydı (Hafta 2 Gün 5-7'de comparator ile dolacak)
+- changes : tespit edilen sapmalar (Hafta 2 Gün 5-7'de comparator ile dolacak)
 
-Bu dosya ne YAPMAYACAK:
+Bu dosya ne YAPMIYOR:
 - Veriyi yorumlamaz, sadece saklar ve geri verir
+- Şema çıkarmaz (o schema.py'nin işi), API'ye istek atmaz (o fetcher.py'nin işi)
 
 ÖNEMLİ KURAL: Veritabanına dokunan TEK dosya budur.
 Başka hiçbir modül doğrudan veritabanına yazmaz veya okumaz.
-
-Ne zaman yazılacak: Hafta 2, Gün 3-4
 """
 
-# Henüz kod yazılmadı - bu dosya şu an sadece bir yer tutucudur.
+import json
+import sqlite3
+from contextlib import contextmanager
+from pathlib import Path
+
+# Bu dosya src/ klasörünün içinde durduğu için proje kökü bir üst seviyededir.
+PROJE_KOKU = Path(__file__).resolve().parent.parent
+VARSAYILAN_DB_YOLU = PROJE_KOKU / "data" / "monitor.db"
+
+# Üç tablo da burada kuruluyor (Bölüm 5.2'deki yapı). checks ve changes
+# tabloları bu turda boş kalacak; onlara yazma/okuma fonksiyonu Gün 5-7'de,
+# comparator.py yazılırken eklenecek.
+TABLOLARI_OLUSTUR_SORGUSU = """
+CREATE TABLE IF NOT EXISTS schemas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    api_id TEXT NOT NULL,
+    schema_json TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS checks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    api_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    response_time_ms INTEGER,
+    checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS changes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    api_id TEXT NOT NULL,
+    change_type TEXT NOT NULL,
+    details TEXT,
+    llm_comment TEXT,
+    detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+
+class DepolamaHatasi(Exception):
+    """Veritabanına erişilemediğinde veya bir sorgu başarısız olduğunda kullanılır."""
+
+
+@contextmanager
+def _baglanti_ac(db_yolu):
+    """Veritabanı klasörünü hazırlar, bağlantıyı açar ve iş bitince MUTLAKA kapatır.
+
+    NOT: sqlite3.Connection'ın kendi "with" desteği bağlantıyı kapatmaz, yalnızca
+    işlemi onaylar/geri alır. Bu yüzden kapatma işi burada elle, finally ile yapılıyor.
+    """
+    try:
+        Path(db_yolu).parent.mkdir(parents=True, exist_ok=True)
+        baglanti = sqlite3.connect(db_yolu)
+    except (OSError, sqlite3.Error) as hata:
+        raise DepolamaHatasi(f"Veritabanına bağlanılamadı ({db_yolu}): {hata}")
+
+    try:
+        yield baglanti
+        baglanti.commit()
+    finally:
+        baglanti.close()
+
+
+def veritabanini_hazirla(db_yolu=VARSAYILAN_DB_YOLU):
+    """Üç tabloyu da (schemas, checks, changes) yoksa oluşturur; varsa dokunmaz."""
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            baglanti.executescript(TABLOLARI_OLUSTUR_SORGUSU)
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Tablolar oluşturulamadı: {hata}")
+
+
+def sema_kaydet(api_id, sema, db_yolu=VARSAYILAN_DB_YOLU):
+    """Bir API'nin şemasını yeni bir satır olarak ekler; eski kayıtlara dokunmaz (geçmiş korunur)."""
+    sema_metni = json.dumps(sema, ensure_ascii=False)
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            baglanti.execute(
+                "INSERT INTO schemas (api_id, schema_json) VALUES (?, ?)",
+                (api_id, sema_metni),
+            )
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Şema kaydedilemedi (api_id={api_id}): {hata}")
+
+
+def son_semayi_oku(api_id, db_yolu=VARSAYILAN_DB_YOLU):
+    """O API için en son kaydedilen şemayı döndürür; hiç kayıt yoksa None döndürür (hata değildir)."""
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            satir = baglanti.execute(
+                "SELECT schema_json FROM schemas WHERE api_id = ? "
+                "ORDER BY id DESC LIMIT 1",
+                (api_id,),
+            ).fetchone()
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Şema okunamadı (api_id={api_id}): {hata}")
+
+    if satir is None:
+        return None
+    return json.loads(satir[0])
+
+
+# ---------------------------------------------------------------------------
+# GEÇİCİ ELLE-TEST GÖSTERİM BÖLÜMÜ
+#
+# Aşağısı yalnızca bu dosya doğrudan çalıştırıldığında devreye girer. Amacı,
+# Hafta 2 Gün 3-4'ün depolama katmanını elle doğrulamak. Otomatik testler
+# Hafta 2 Gün 5-7'de comparator ile birlikte yazılacak.
+# ---------------------------------------------------------------------------
+
+def _gosterim():
+    """Veritabanını hazırlar, örnek bir şema kaydedip geri okur, sonucu ekrana yazar."""
+    veritabanini_hazirla()
+    print(f"Veritabanı hazır: {VARSAYILAN_DB_YOLU}")
+
+    ornek_sema = {"id": "integer", "login": "string", "plan": {"space": "integer"}}
+    sema_kaydet("gosterim-ornegi", ornek_sema)
+    print("Örnek şema kaydedildi.")
+
+    okunan = son_semayi_oku("gosterim-ornegi")
+    print("Geri okunan şema:", json.dumps(okunan, ensure_ascii=False))
+
+    bos_sonuc = son_semayi_oku("hic-kaydi-olmayan-api")
+    print("Kaydı olmayan API için sonuç:", bos_sonuc)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_gosterim())

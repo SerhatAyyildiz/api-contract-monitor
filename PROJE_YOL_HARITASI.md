@@ -329,10 +329,10 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Ajan modu:** Plan modu → Default
 
 #### Gün 3-4: Depolama katmanı
-- [ ] `src/storage.py` yaz: SQLite tablolarını oluşturur (Bölüm 5.2), şema kaydeder/okur
-- [ ] İlk çalıştırmada referans şema kaydedilmeli, sonraki çalıştırmalarda okunmalı
-- [ ] `data/monitor.db` dosyasının oluştuğunu doğrula
-- [ ] Commit: "SQLite depolama katmanı eklendi"
+- [x] `src/storage.py` yaz: SQLite tablolarını oluşturur (Bölüm 5.2), şema kaydeder/okur
+- [x] İlk çalıştırmada referans şema kaydedilmeli, sonraki çalıştırmalarda okunmalı
+- [x] `data/monitor.db` dosyasının oluştuğunu doğrula
+- [x] Commit: "SQLite depolama katmanı eklendi" — *G5*
 
 **Ajan modu:** Default / Sonnet
 
@@ -509,7 +509,15 @@ Zaman yetmezse **bu sırayla** feda edilir:
 > Anlatı, gerekçe ve "neden böyle yaptık" açıklamaları buraya değil `ILERLEME.md`'ye yazılır.
 > Burası kuru kayıt tutar.
 >
-> **Ne zaman yazılır:** Ana akış ajanı, Kapı 2 (commit) onayı alındıktan hemen sonra yazar.
+> **Ne zaman yazılır:** Kayıt, testler çalıştırıldıktan sonra ve **denetçi raporu gelmeden önce** açılır.
+> Sebebi yukarıdaki ilk kuraldır: denetçi buradan okuyor, kayıt açılmamışsa okuyacağı bir şey olmuyor.
+>
+> **Görev akışının tamamı:**
+> 1. Kod biter, ajan testleri kendisi çalıştırır
+> 2. **Bölüm 11 kaydı açılır** — denetçi kararı satırı boş bırakılır
+> 3. Proje sahibi denetçi raporunu getirir; ajan raporu bu kayda işler
+> 4. Kapı 2: commit onayı alınır, commit atılır
+> 5. **Bölüm 7 kutucukları** işaretlenir ve **`ILERLEME.md`** kaydı eklenir
 
 ### Kayıt formatı
 
@@ -519,7 +527,6 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 ### G[sıra no] — [Görev adı]  (Hafta X, Gün Y)
 
 **Tarih:** [tarih]
-**Commit:** [hash ilk 7 karakter]
 
 **Yapılan işler:**
 - [madde]
@@ -544,7 +551,7 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 - **Görev adı benzersiz olmalıdır.** İki görev aynı adı taşıyamaz. Proje sahibi denetçiye bu adı vereceği için karışıklık olmamalıdır.
 - **Atlanan testler gizlenmez.** Çalıştırılamayan bir test varsa gerekçesiyle yazılır. Denetçinin en değerli bulgusu genelde budur.
-- **Denetçi kararı sonradan doldurulur.** Kayıt commit anında açılır, denetçi raporu geldikten sonra karar satırı güncellenir.
+- **Denetçi kararı sonradan doldurulur.** Kayıt, testler bittiğinde denetçi kararı satırı boş olarak açılır; rapor geldikten sonra o satır güncellenir. Commit bundan sonra atılır.
 - **Eski kayıtlara dokunulmaz.** Bir hata sonradan fark edilirse eski kayıt düzeltilmez; yeni bir kayıt açılıp "G3'teki şu sorun giderildi" şeklinde not düşülür.
 
 ---
@@ -554,7 +561,6 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 ### G1 — Mimari plan ve klasör yapısının kurulması  (Hafta 1, Gün 3-4)
 
 **Tarih:** 23.08.2026
-**Commit:** b49c6cd
 
 **Yapılan işler:**
 - Python 3.12.10 kuruldu (proje sahibi tarafından), git kimliği ayarlandı (proje sahibi tarafından)
@@ -617,7 +623,6 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 ### G2 — Uzak depo bağlantısı ve ilk gönderim  (Hafta 1, Gün 3-4 sonu)
 
 **Tarih:** 23.08.2026
-**Commit:** `a3ee57d` — bu görevde yeni kod veya dosya değişikliği yapılmadı; uzak depoya gönderilen son kayıt budur.
 
 > **G1'deki bekleyen düzeltmeler bu görevde kapandı:** dal adı `main` olarak değiştirildi ve uzak depo bağlanıp ilk gönderim yapıldı. G1 kaydı, "eski kayıtlara dokunulmaz" kuralı gereği olduğu gibi bırakıldı.
 
@@ -658,7 +663,6 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 ### G3 — İlk çalışan veri çekme modülü  (Hafta 1, Gün 5-7)
 
 **Tarih:** 24.08.2026
-**Commit:** *(bir sonraki commit'te doldurulacak)*
 
 > **Not:** Bu kayıt, Bölüm 11'in "commit sonrası yazılır" kuralından farklı olarak denetim turundan **önce** açılmıştır. Gerekçe: aynı bölüm denetçinin tek bilgi kaynağının burası olduğunu söylüyor; kayıt açılmadan denetçinin okuyacağı bir şey olmuyor. Proje sahibinin onayıyla bu sıra tercih edildi.
 
@@ -715,7 +719,6 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 ### G4 — Şema çıkarma modülü  (Hafta 2, Gün 1-2)
 
 **Tarih:** 24.08.2026
-**Commit:** *(bir sonraki commit'te doldurulacak)*
 
 > **Not:** G3'te belirlenen sıra izlendi: bu kayıt denetim turundan **önce** açıldı, çünkü Bölüm 11 denetçinin tek bilgi kaynağı.
 
@@ -757,6 +760,50 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 - **Çok büyük/uzun bir liste (performans) denenmedi.** Bu adımın kapsamı doğruluk, hız değil.
 
 **Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, şema çıkarma modülünün tamamlandığını ve istenen her senaryoda doğru çalıştığını doğruladı. Otomatik testlerin henüz yazılmamış olması eksiklik sayılmadı; plana göre bunlar bir sonraki adımda karşılaştırma modülüyle birlikte yazılacak.
+
+**Bekleyen düzeltmeler:** yok
+
+---
+
+### G5 — SQLite depolama katmanı  (Hafta 2, Gün 3-4)
+
+**Tarih:** 25.08.2026
+
+**Yapılan işler:**
+- Önce Plan modunda kapsam kararı netleştirildi: üç tablo da (schemas, checks, changes) kurulacak ama bu turda yalnızca schemas'a yazma/okuma fonksiyonu yazılacak; şema geçmişi tutulacak (üzerine yazma değil, yeni satır ekleme)
+- `src/storage.py` yazıldı — G1'de yalnızca açıklama yorumu içeren yer tutucuydu, bu turda çalışan koda dönüştürüldü
+- Dört fonksiyon: `veritabanini_hazirla`, `sema_kaydet`, `son_semayi_oku`, `_baglanti_ac`
+- `fetcher.py`'deki desenler tekrar kullanıldı: proje kökünden yol çözme, özel istisna sınıfı (`DepolamaHatasi`), doğrudan çalıştırıldığında devreye giren gösterim bölümü
+- **Testler sırasında bir kusur bulundu ve düzeltildi:** `sqlite3.Connection` nesnesinin kendi `with` desteği bağlantıyı kapatmıyor, yalnızca işlemi onaylıyor/geri alıyormuş. Bu, bağlantıların açık kalmasına yol açıyordu (Windows'ta bozuk bir veritabanı dosyasını silmeye çalışırken "dosya başka bir işlem tarafından kullanılıyor" hatasıyla ortaya çıktı). `_baglanti_ac` fonksiyonu, bağlantıyı `finally` bloğuyla kapatmayı garanti eden gerçek bir bağlam yöneticisine dönüştürülerek düzeltildi
+- Yeni bağımlılık eklenmedi; `sqlite3` standart kütüphaneden kullanıldı, `requirements.txt` değişmedi
+
+**Oluşturulan/değişen dosyalar:**
+- `src/storage.py` — üç tabloyu kurar; `schemas` tablosuna şema kaydeder ve en son kaydedilen şemayı geri okur
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Veritabanı ve üç tablo oluşuyor mu | `schemas`, `checks`, `changes` mevcut | Üçü de mevcut | Geçti |
+| 2 | Hazırlama fonksiyonu iki-üç kez çağrılınca | Hata vermemeli | Hata vermedi | Geçti |
+| 3 | Şema kaydet → geri oku | Aynı şema dönüyor | Birebir aynı döndü | Geçti |
+| 4 | Aynı API için ikinci şema kaydı | Son kaydedilen dönüyor, eski satır duruyor | Son kaydedilen doğru döndü, veritabanında 2 satır olduğu doğrulandı (geçmiş korunuyor) | Geçti |
+| 5 | Hiç kaydı olmayan API | `None` dönüyor, istisna yok | `None` döndü | Geçti |
+| 6 | İç içe yapılı + dizi içeren gerçek bir şema (schema.py üretimi) | Bozulmadan geri dönüyor | Birebir aynı döndü | Geçti |
+| 7 | **Uçtan uca:** fetcher → schema → storage zinciri, canlı bir adresle | Zincir çalışıyor | Gerçek adresten veri çekildi, şeması çıkarıldı, kaydedildi, geri okundu — hepsi tutarlı | Geçti |
+| 8a | **Bozarak:** var olan bir klasöre veritabanı gibi bağlanmaya çalışmak | Çökmeden `DepolamaHatasi` | Yakalandı, anlaşılır mesaj verildi | Geçti |
+| 8b | **Bozarak:** geçersiz formatta (düz metin) bir dosyaya bağlanmaya çalışmak | Çökmeden `DepolamaHatasi` | Yakalandı; ayrıca bağlantının düzgün kapandığı, dosyanın hemen sonra sorunsuz silinebildiği doğrulandı | Geçti |
+| 9 | **Güvenlik:** `data/monitor.db` git tarafından takip ediliyor mu | Takip edilmemeli | `git status`, `git ls-files` ve `git check-ignore` üçü de doğruladı: dosya hiç görünmüyor, `.gitkeep` istisnası bozulmamış | Geçti |
+| 10 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 24 satır, iç içe blok en fazla 1 kat, anlamsız isim yok, modül karışması yok | Geçti |
+
+*Not: 8b testi ayrıca bağlantı kapatma düzeltmesinin gerçekten işe yaradığını kanıtlamak için kullanıldı — düzeltmeden önce bu adımda dosya silinemiyordu.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Otomatik test dosyası yazılmadı.** Tüm testler elle çalıştırıldı. Yol haritasında otomatik testler Hafta 2 Gün 5-7'de comparator ile birlikte yazılıyor.
+- **`checks` ve `changes` tabloları için yazma/okuma testi yapılmadı.** Bilinçli bir kapsam kararı gereği bu turda bu tablolara hiç yazma/okuma fonksiyonu yazılmadı; tablolar boş duruyor, Gün 5-7'de dolduruluyor.
+- **Aynı anda birden fazla işlemin (eşzamanlı erişim) veritabanına yazması denenmedi.** Bu aşamada sistem tek seferde tek işlem yapıyor; main.py yazıldığında (Hafta 3) tekrar gözden geçirilmesi gerekebilir.
+- **Çok büyük miktarda şema kaydı (performans/disk kullanımı) denenmedi.** Kapsam dışı, bu adımın hedefi doğruluk.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, depolama katmanının tamamlandığını ve sağlam çalıştığını doğruladı; test sırasında bulunan gerçek bir hatanın (bağlantının kapanmaması) düzeltilmiş olması ayrıca not edildi. `checks` ve `changes` tablolarına henüz yazma yapılmaması eksiklik sayılmadı — plana uygun bilinçli bir kapsam kararı, bir sonraki adımda doldurulacak.
 
 **Bekleyen düzeltmeler:** yok
 
