@@ -21,9 +21,11 @@ Bu dosya ne YAPMIYOR:
 - API'ye istek atmaz, fetcher'ın durum bilgisiyle (timeout/response_error/
   invalid_json) hiç ilgilenmez - bunlar şema karşılaştırması değildir,
   main.py'nin (Hafta 3) işidir
-- slow_response tespiti yapmaz - referans yanıt süresi henüz hiçbir yerde
-  saklanmıyor (bkz. BACKLOG.md)
 - Sadece farkı bulur ve listeyi geri verir; ne yapılacağına main.py karar verir
+
+Ayrıca yanit_suresini_degerlendir() ile yanıt süresi karşılaştırması yapar:
+bu da veritabanına/ağa dokunmadan, iki sayıyı alıp bulgu üreten saf bir
+fonksiyondur (referans süreyi okuyan main.py'dir).
 """
 
 # Her değişiklik tipinin ne kadar önemli olduğu (PROJE_YOL_HARITASI.md Bölüm 6).
@@ -33,7 +35,11 @@ ONEM_DERECELERI = {
     "type_changed": "critical",
     "nested_changed": "critical",
     "field_added": "info",
+    "slow_response": "info",
 }
+
+# Yanıt süresi referansın kaç katını aşarsa "yavaş" sayılacağı (Bölüm 6).
+YAVAS_YANIT_KAT_SAYISI = 3
 
 
 def semalari_karsilastir(eski_sema, yeni_sema, yol=""):
@@ -142,3 +148,18 @@ def _bulgu_olustur(change_type, field, details):
         "details": details,
         "severity": ONEM_DERECELERI[change_type],
     }
+
+
+def yanit_suresini_degerlendir(guncel_sure_ms, referans_sure_ms):
+    """Güncel yanıt süresi referansın belirlenen katından fazlaysa slow_response bulgusu üretir."""
+    if not referans_sure_ms:
+        return []
+
+    if guncel_sure_ms <= referans_sure_ms * YAVAS_YANIT_KAT_SAYISI:
+        return []
+
+    details = (
+        f"Yanıt süresi {guncel_sure_ms} ms; son kontrollerin ortalaması "
+        f"{referans_sure_ms} ms ({YAVAS_YANIT_KAT_SAYISI} katından fazla)."
+    )
+    return [_bulgu_olustur("slow_response", None, details)]

@@ -54,9 +54,15 @@ def api_listesini_oku(config_yolu=VARSAYILAN_CONFIG_YOLU):
 
 
 def _config_dosyasini_oku(config_yolu):
-    """Config dosyasının ham metnini okur; dosya yoksa veya açılamıyorsa anlaşılır hata verir."""
+    """Config dosyasının ham metnini okur; dosya yoksa veya açılamıyorsa anlaşılır hata verir.
+
+    Kodlama olarak utf-8-sig kullanılıyor: Windows'ta bazı düzenleyiciler
+    (Not Defteri, PowerShell) dosyanın başına BOM adı verilen görünmez bir
+    işaret koyar. Düz utf-8 ile okunduğunda bu işaret JSON'u bozar. utf-8-sig
+    varsa işareti atlar, yoksa normal utf-8 gibi davranır.
+    """
     try:
-        return Path(config_yolu).read_text(encoding="utf-8")
+        return Path(config_yolu).read_text(encoding="utf-8-sig")
     except FileNotFoundError:
         raise YapilandirmaHatasi(f"Yapılandırma dosyası bulunamadı: {config_yolu}")
     except OSError as hata:

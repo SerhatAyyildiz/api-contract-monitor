@@ -5,9 +5,11 @@ Kayıtlar data/monitor.db dosyasında tutulacak. Bu dosya bir veritabanıdır
 (düzenli kayıt tutan, içinde tablolar bulunan tek bir dosya).
 
 Bu dosya üç tablo yönetiyor:
-- schemas : her API için kaydedilen şema geçmişi (bu turda dolduruluyor)
-- checks  : her kontrol turunun kaydı (Hafta 2 Gün 5-7'de comparator ile dolacak)
-- changes : tespit edilen sapmalar (Hafta 2 Gün 5-7'de comparator ile dolacak)
+- schemas : her API için kaydedilen şema geçmişi
+- checks  : her kontrol turunun kaydı (durum + yanıt süresi)
+- changes : tespit edilen sapmalar
+
+Üçü de dolu; hepsini main.py çağırıyor (Hafta 3, Gün 3-4).
 
 Bu dosya ne YAPMIYOR:
 - Veriyi yorumlamaz, sadece saklar ve geri verir
@@ -26,9 +28,12 @@ from pathlib import Path
 PROJE_KOKU = Path(__file__).resolve().parent.parent
 VARSAYILAN_DB_YOLU = PROJE_KOKU / "data" / "monitor.db"
 
-# Üç tablo da burada kuruluyor (Bölüm 5.2'deki yapı). checks ve changes
-# tabloları bu turda boş kalacak; onlara yazma/okuma fonksiyonu Gün 5-7'de,
-# comparator.py yazılırken eklenecek.
+# Yavaş yanıt tespiti için kaç geçmiş kontrole bakılacağı ve
+# kıyas yapılabilmesi için gereken en az kayıt sayısı.
+VARSAYILAN_GECMIS_ADEDI = 10
+SLOW_RESPONSE_ICIN_ASGARI_KAYIT = 3
+
+# Üç tablo da burada kuruluyor (Bölüm 5.2'deki yapı).
 TABLOLARI_OLUSTUR_SORGUSU = """
 CREATE TABLE IF NOT EXISTS schemas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,6 +122,56 @@ def son_semayi_oku(api_id, db_yolu=VARSAYILAN_DB_YOLU):
     if satir is None:
         return None
     return json.loads(satir[0])
+
+
+def kontrol_kaydet(api_id, status, response_time_ms, db_yolu=VARSAYILAN_DB_YOLU):
+    """Bir kontrol turunun sonucunu (durum + yanıt süresi) checks tablosuna yeni satır olarak ekler."""
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            baglanti.execute(
+                "INSERT INTO checks (api_id, status, response_time_ms) VALUES (?, ?, ?)",
+                (api_id, status, response_time_ms),
+            )
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Kontrol kaydedilemedi (api_id={api_id}): {hata}")
+
+
+def degisiklikleri_kaydet(api_id, bulgular, db_yolu=VARSAYILAN_DB_YOLU):
+    """Bulgu listesindeki her değişikliği changes tablosuna, tek bağlantıda, ayrı satır olarak ekler."""
+    if not bulgular:
+        return
+
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            baglanti.executemany(
+                "INSERT INTO changes (api_id, change_type, details) VALUES (?, ?, ?)",
+                [(api_id, bulgu["change_type"], bulgu["details"]) for bulgu in bulgular],
+            )
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Değişiklikler kaydedilemedi (api_id={api_id}): {hata}")
+
+
+def ortalama_yanit_suresini_oku(api_id, adet=VARSAYILAN_GECMIS_ADEDI, db_yolu=VARSAYILAN_DB_YOLU):
+    """Son N başarılı kontrolün ortalama yanıt süresini döndürür; yeterli geçmiş yoksa None döndürür."""
+    with _baglanti_ac(db_yolu) as baglanti:
+        try:
+            sureler = _gecmis_yanit_surelerini_getir(baglanti, api_id, adet)
+        except sqlite3.Error as hata:
+            raise DepolamaHatasi(f"Geçmiş yanıt süreleri okunamadı (api_id={api_id}): {hata}")
+
+    if len(sureler) < SLOW_RESPONSE_ICIN_ASGARI_KAYIT:
+        return None
+    return int(sum(sureler) / len(sureler))
+
+
+def _gecmis_yanit_surelerini_getir(baglanti, api_id, adet):
+    """Yalnızca başarılı (status='ok') kontrollerin son N yanıt süresini veritabanından çeker."""
+    satirlar = baglanti.execute(
+        "SELECT response_time_ms FROM checks WHERE api_id = ? AND status = 'ok' "
+        "AND response_time_ms IS NOT NULL ORDER BY id DESC LIMIT ?",
+        (api_id, adet),
+    ).fetchall()
+    return [satir[0] for satir in satirlar]
 
 
 # ---------------------------------------------------------------------------

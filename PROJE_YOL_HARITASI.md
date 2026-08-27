@@ -913,6 +913,89 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G8 — Hata yönetimi ve ana akış  (Hafta 3, Gün 3-4)
+
+**Tarih:** 27.08.2026
+
+> **Not:** Bu görevin kodu bir önceki oturumda yazılmaya başlanmış, oturum token limitine takıldığı için yarım kalmıştı. Üç dosyada commit edilmemiş yaklaşık 280 satır duruyordu. Kod import edilebiliyor ve mevcut 27 test geçiyordu, ancak yeni kodun hiç testi yoktu ve ana akış bir kez bile çalıştırılmamıştı. Proje sahibinin kararıyla kod silinmedi, denetlenip tamamlandı.
+
+**Yapılan işler:**
+- Bölüm 2.6 gereği "ne ters gidebilir" listesi (9 madde) çıkarıldı ve proje sahibi tarafından onaylandı
+- `src/main.py` tamamlandı — altı modülü sırayla çağıran ana akış; 16 fonksiyon
+- **Devralınan kodda üç gerçek kusur bulundu ve düzeltildi** (aşağıda ayrıntılı)
+- **Testler sırasında iki gerçek kusur daha bulundu ve düzeltildi:** hata metinlerinde API adresinin sızması (güvenlik) ve BOM'lu config dosyasının okunamaması
+- **G6'dan devredilen iki iş tamamlandı:** veri çekme katmanının hata durumları (`timeout`, `response_error`, `invalid_json`, `network_error`) bulguya çevriliyor; `checks` tablosu yanıt süresiyle birlikte dolduruluyor
+- `slow_response` tespiti eklendi: son 10 başarılı kontrolün ortalaması referans alınıyor, 3 katı aşılırsa bulgu üretiliyor; yanlış alarmı önlemek için en az 3 geçmiş kayıt şartı var
+- Loglama eklendi (`logging`, standart kütüphane); zaman damgalı ve seviyeli
+- Üç yeni test dosyası yazıldı: 50 yeni otomatik test (toplam 77, hepsi geçiyor)
+- Yeni bağımlılık eklenmedi; `requirements.txt` değişmedi
+- `.env` dosyasına hiçbir noktada dokunulmadı, içeriği okunmadı/ekrana yazdırılmadı
+
+**Devralınan kodda bulunup düzeltilen kusurlar:**
+
+1. **Referans şema her turda üzerine yazılıyordu.** Değişiklik olsun olmasın her turda yeni bir şema satırı ekleniyordu. İki sorunu vardı: veritabanı saatte bir satır büyürdü (ayda ~720 gereksiz satır) ve bir alan bir tur kaybolup sonra geri geldiğinde sistem aynı değişikliği ikinci kez bildirirdi. Artık şema yalnızca API ilk kez görüldüğünde veya gerçekten bir fark bulunduğunda kaydediliyor.
+2. **Veritabanı hatası bildirimi engelliyordu.** Kontrol kaydı yazılamazsa fonksiyon orada kesiliyor ve Telegram bildirimi hiç gitmiyordu. Bildirim bu sistemin asıl çıktısı olduğu için kaydetme ve bildirme ayrıldı; kayıt başarısız olsa bile bildirim deneniyor.
+3. **Kullanılmayan değişken** (`tek_api_isle` içinde), Bölüm 2.9 gereği silindi.
+
+**Testler sırasında bulunup düzeltilen kusurlar:**
+
+4. **GÜVENLİK — API adresi hata metinleriyle sızıyordu.** `requests` kütüphanesi ağ hatalarında istenen adresin tamamını hata metnine koyuyor; o metin de loga, Telegram mesajına ve veritabanına gidiyordu. `main.py`'nin kendi dokümantasyonu adreslerin loglanmayacağını söylüyordu ama kod bunu uygulamıyordu. Adreste erişim anahtarı taşıyan bir API eklendiğinde anahtar üç yere birden sızardı. İki katmanlı koruma eklendi: önce config'deki gerçek adres ve sunucu adı metinden çıkarılıyor, sonra genel bir desen kalan adres benzeri parçaları temizliyor.
+5. **BOM'lu config dosyası okunamıyordu.** Windows'ta Not Defteri veya PowerShell ile kaydedilen dosyaların başına görünmez bir işaret (BOM) ekleniyor ve sistem dosyayı "geçersiz JSON" sayıp hiç başlamıyordu. Config okuma kodlaması `utf-8-sig` olarak değiştirildi. Bu, `fetcher.py`'ye dokunulmaması planından bilinçli bir sapmadır; gerekçesi bunun tam olarak bu görevin konusu olan bir config okuma hatası olması ve Windows'ta gerçekçi bir senaryo olmasıdır.
+
+**Oluşturulan/değişen dosyalar:**
+- `src/main.py` — altı modülü sırayla çağıran ana akış; hata durumlarını bulguya çevirir, sonuçları kaydeder, bildirim gönderir, adresleri gizler
+- `src/storage.py` — `checks` ve `changes` tablolarına yazma ve geçmiş yanıt süresi ortalaması okuma eklendi (devralınan koddan, değiştirilmedi)
+- `src/comparator.py` — `yanit_suresini_degerlendir` eklendi (devralınan koddan, değiştirilmedi)
+- `src/fetcher.py` — config okuma kodlaması `utf-8-sig` yapıldı (BOM düzeltmesi)
+- `tests/test_main.py` — **yeni**, 33 otomatik test
+- `tests/test_storage.py` — **yeni**, 11 otomatik test
+- `tests/test_fetcher.py` — **yeni**, 6 otomatik test (config okuma dayanıklılığı)
+- `BACKLOG.md` — `slow_response` maddesi "Tamamlananlar" bölümüne taşındı
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Tüm otomatik test paketi | Hepsi geçmeli | 77/77 geçti (27 mevcut + 50 yeni) | Geçti |
+| 2 | **Uçtan uca:** ilk çalıştırma, canlı adres | Referans kaydedilir | "ilk kez görülüyor" uyarısı, şema kaydedildi | Geçti |
+| 3 | **Uçtan uca:** ikinci çalıştırma | "değişiklik yok" | 226 ms, bulgu yok, bildirim gitmedi | Geçti |
+| 4 | **Kusur 1 doğrulaması:** iki tur sonrası şema satır sayısı | 1 satır kalmalı | `checks` 2 satır ama `schemas` 1 satır — düzeltme kanıtlandı | Geçti |
+| 5 | **Bozarak:** çözümlenemeyen adres | `response_error`, tur devam eder | Yakalandı, sağlam API işlenmeye devam etti | Geçti |
+| 6 | **Bozarak:** 404 dönen adres | `response_error` | Yakalandı, HTTP kodu bildirildi | Geçti |
+| 7 | **Bozarak:** JSON olmayan yanıt | `invalid_json` | Yakalandı | Geçti |
+| 8 | **Bozarak:** dört API'den üçü hatalı | Sağlam olan yine de işlenir | 4 API işlendi, hiçbiri diğerini engellemedi | Geçti |
+| 9 | **Bozarak:** config dosyası silindi | Tur başlamaz, çıkış kodu 1 | "dosya bulunamadı", çıkış kodu 1 | Geçti |
+| 10a | **Bozarak:** tüm API'ler kapalı (BOM'lu dosya) | Uyarı, çıkış kodu 0 | **BOM yüzünden "geçersiz JSON" hatası verdi** | **Geçmedi** |
+| 10b | Aynı test, BOM düzeltmesinden sonra | Uyarı, çıkış kodu 0 | "etkin API bulunamadı", çıkış kodu 0 | Geçti |
+| 11 | **Güvenlik/bozarak:** hata metninde adres gizleniyor mu | Adres hiç görünmemeli | İlk denemede sunucu adı sızdı, düzeltildi; ikinci denemede hiçbir yerde adres kalmadı | Geçti |
+| 12 | **Uçtan uca/gerçek bildirim:** referanstan alan silindi | `field_added` + Telegram | Tespit edildi, gerçek bildirim gönderildi | Geçti |
+| 13 | **Uçtan uca/gerçek bildirim:** referansa olmayan alan eklendi | `field_removed` + Telegram | `field_removed: kritik_alan` tespit edildi, gerçek bildirim gönderildi | Geçti |
+| 14 | `checks` tablosuna durum ve süre yazılıyor mu | `ok`/`changed`/`error` + ms | Üç durum da doğru yazıldı, süreler kaydedildi | Geçti |
+| 15 | `changes` tablosuna bulgular yazılıyor mu | Her bulgu ayrı satır | Doğru yazıldı | Geçti |
+| 16 | **Bozarak:** Telegram'a ulaşılamıyor | Sistem çökmez, tur biter | Uyarı loglandı, çıkış kodu 0, tur normal bitti | Geçti |
+| 17 | **Güvenlik:** bildirim hatası loglanırken token sızıyor mu | Sadece durum kelimesi | Yalnızca `network_error` yazıldı, ham metin yazılmadı | Geçti |
+| 18 | `slow_response` gerçek veritabanı geçmişiyle | Eşik aşılınca bulgu | Ortalama 230 ms okundu, 691 ms'de bulgu üretildi, 230 ms'de üretilmedi | Geçti |
+| 19 | **Güvenlik:** `.env` ve veritabanı git'e giriyor mu | İkisi de girmemeli | İkisi de takip edilmiyor | Geçti |
+| 20 | Bozarak testler sonrası config geri yüklendi mi | Birebir aynı içerik | Parmak izi aynı | Geçti |
+| 21 | Bölüm 2.9 düzen denetimi | İhlal olmaması | `main.py`'de en uzun fonksiyon 21 satır, iç içe blok en fazla 2 kat, anlamsız isim yok, modül karışması yok | Geçti |
+
+*Not: 10a satırı bilerek tabloda bırakıldı. Bu test ilk denemede gerçekten başarısız oldu ve bir kusur ortaya çıkardı (BOM'lu config okunamıyordu); düzeltme sonrası 10b olarak tekrarlandı. Aynı şekilde 11. testte de ilk deneme kısmen başarısızdı, adres gizleme deseni iki kez güçlendirildi.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Gerçek bir zaman aşımı (`timeout`) durumu bu turda ayrıca tetiklenmedi.** G3'te yerel yavaş sunucuyla kanıtlanmıştı; bu turda aynı kod yolundan geçtiği varsayımına dayanıldı. `durumu_bulguya_cevir` için otomatik testi var ama uçtan uca gerçek bir zaman aşımı yaşatılmadı.
+- **Gerçekten yavaş bir sunucuyla `slow_response` uçtan uca denenmedi.** Fonksiyon gerçek veritabanı geçmişiyle sınandı (test 18) ancak gerçek bir yavaş yanıt beklenmedi; bunun için 690 ms'den uzun süren bir adres gerekirdi.
+- **Veritabanı hatası uçtan uca gerçek koşulda tetiklenmedi.** Kusur 2'nin düzeltmesi otomatik testle doğrulandı (sahte bir hata fırlatılarak) ama gerçek bir disk/kilit hatası yaşatılmadı.
+- **Birden fazla gerçek API ile normal (hatasız) tur denenmedi.** Çoklu API akışı yalnızca bozarak testte (3 hatalı + 1 sağlam) görüldü. Bölüm 9'un "en az 3 API izleniyor" ölçütü henüz karşılanmıyor; config'de tek etkin API var.
+- **GitHub Actions ortamında hiç çalıştırılmadı** — Hafta 3 Gün 5-7'nin konusu.
+- **Eşzamanlı erişim (aynı anda iki tur) denenmedi.** G5'te not düşülmüştü; sistem şu an tek seferde tek tur çalışıyor, Actions'a geçildiğinde tekrar bakılmalı.
+- **Telegram'ın gerçek bir hata kodu döndürmesi (geçersiz token vb.) fiilen tetiklenmedi.** G7'de de atlanmıştı; bu turda ağ hatası sahte olarak simüle edildi.
+
+**Denetçi kararı:** Onaylandı — engelleyici bulgu yok. Denetim, sistemin hatalarla karşılaştığında çökmediğini doğruladı: ağ kopması, zaman aşımı ve bozuk yanıt durumlarının hepsi yakalanıp işleniyor, bir API'deki sorun diğerlerini etkilemiyor. Devralınan yarım koddaki üç kusurun bulunup giderilmesi, risk alınmaması bakımından doğru bir karar olarak değerlendirildi. Adres/anahtar sızıntısına karşı konan koruma denetim tarafından ayrıca sınandı ve gerçekçi senaryolarda çalıştığı teyit edildi. `fetcher.py`'ye dokunulması, yani plan dışına çıkılması yerinde bulundu: config dosyasının Windows'ta okunamaması tam da bu görevin konusuna giriyordu ve düzeltme tek satırlık, düşük riskliydi.
+
+**Bekleyen düzeltmeler:**
+- Adres gizleme korumasında çok uç bir ihtimalde teorik bir boşluk var: hata metninde öneksiz, çıplak bir sunucu adı geçerse ve API adresi fonksiyona verilmemişse o ad gizlenmeden kalabilir. Denetim bunu acil görmedi. Gerçek akışta bu durum oluşmuyor, çünkü ana akış hata metnini temizlerken API'nin config'deki adresini her zaman veriyor; adres verildiğinde sunucu adı kesin olarak çıkarılıyor. Takip için `BACKLOG.md`'ye taşındı.
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
