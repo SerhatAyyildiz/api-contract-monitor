@@ -368,22 +368,24 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Ajan modu:** Default / Sonnet
 
 #### Gün 3-4: Hata yönetimi ve ana akış
-- [ ] Ajandan "bu sistemde ne ters gidebilir" listesi iste, onayla
-- [ ] Tüm modüllere hata yakalama ekle:
+- [x] Ajandan "bu sistemde ne ters gidebilir" listesi iste, onayla — *G8, 9 maddelik liste onaylandı*
+- [x] Tüm modüllere hata yakalama ekle:
   - Ağ hatası / timeout
   - Geçersiz JSON
   - HTTP 4xx/5xx yanıtlar
   - Veritabanı hatası
   - Telegram gönderim hatası (bildirim gitmezse sistem çökmemeli)
   - Config dosyası eksik/bozuk
-- [ ] `src/main.py` yaz: tüm modülleri sırayla çalıştıran ana akış
-- [ ] **G6'dan devredildi:** `main.py` içinde fetcher'ın `durum` alanını (`timeout`, `response_error`, `invalid_json`) bulguya çevir — `comparator.py` bunlarla bilinçli olarak ilgilenmiyor (bkz. Bölüm 11, G6)
-- [ ] **G6'dan devredildi:** `checks` tablosuna yazma ekle (yanıt süresi dahil); bu yapılınca `slow_response` tespiti de mümkün olur (bkz. `BACKLOG.md`)
-- [ ] Loglama ekle (`logging` modülü, standart kütüphane)
-- [ ] **Bozarak test:** Ajandan config'e yanlış URL yazıp çalıştırmasını iste, sistemin düzgün hata verdiğini sana raporlamasını iste
-- [ ] Commit: "Hata yönetimi ve ana akış eklendi"
+- [x] `src/main.py` yaz: tüm modülleri sırayla çalıştıran ana akış — *G8*
+- [x] **G6'dan devredildi:** `main.py` içinde fetcher'ın `durum` alanını (`timeout`, `response_error`, `invalid_json`) bulguya çevir — `comparator.py` bunlarla bilinçli olarak ilgilenmiyor (bkz. Bölüm 11, G6) — *G8'de tamamlandı*
+- [x] **G6'dan devredildi:** `checks` tablosuna yazma ekle (yanıt süresi dahil); bu yapılınca `slow_response` tespiti de mümkün olur (bkz. `BACKLOG.md`) — *G8'de tamamlandı*
+- [x] Loglama ekle (`logging` modülü, standart kütüphane) — *G8*
+- [x] **Bozarak test:** Ajandan config'e yanlış URL yazıp çalıştırmasını iste, sistemin düzgün hata verdiğini sana raporlamasını iste — *G8, 9 farklı bozarak test yapıldı*
+- [x] Commit: "Hata yönetimi ve ana akış eklendi" — *G8, `7630511`*
 
 **Ajan modu:** Default / Sonnet
+
+**✅ Gün 3-4 TAMAMLANDI** — sistem artık tek komutla uçtan uca çalışıyor, hiçbir hata durumunda çökmüyor (G8).
 
 #### Gün 5-7: GitHub Actions ile otomatikleştirme
 - [ ] `.github/workflows/monitor.yml` oluştur

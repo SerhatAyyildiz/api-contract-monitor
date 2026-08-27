@@ -5,6 +5,42 @@
 
 ---
 
+## Kayıt 8 — Sistem artık tek başına baştan sona çalışıyor
+
+**Tarih:** 27 Ağustos 2026
+**Aşama:** Hafta 3, Gün 3-4
+
+### Ne yaptık
+
+Şimdiye kadar sistemin parçaları vardı ama birbirinden bağımsızdı — biri adrese istek atıyor, biri yapıyı karşılaştırıyor, biri haber veriyordu, ama hiçbiri bir araya gelip tek bir bütün oluşturmuyordu. Bu adımda hepsini birbirine bağlayan bir "orkestra şefi" yazıldı: artık tek bir komutla sistem baştan sona kendi kendine çalışıyor.
+
+Bunun yanında sisteme bir sağlamlık katmanı eklendi. Daha önce "acaba bir şey ters giderse ne olur" sorusunun cevabı belirsizdi. Bu turda dokuz farklı aksilik ihtimali tek tek düşünüldü (bağlantı kopması, adresin cevap vermemesi, bozuk cevap, veri saklama sorunu, haber verme sorunu gibi) ve her biri kasıtlı olarak tetiklenip sistemin gerçekten çökmediği kanıtlandı.
+
+Ayrıca bir önceki oturumdan yarım kalmış bir çalışma devralındı. O çalışma çöpe atılmadı; satır satır incelendi, gerçekten üç yanlış davranış bulundu ve düzeltildi. En önemlisi: sistem "referans" olarak sakladığı bilgiyi her kontrolde gereksiz yere baştan yazıyordu — bu hem yer israfıydı hem de bir alan kaybolup sonra geri gelirse aynı haberin ikinci kez gönderilmesine yol açabilirdi. Artık bu bilgi yalnızca gerçekten bir değişiklik olduğunda güncelleniyor.
+
+### Sistem şimdi ne yapabiliyor
+
+- Tek bir komutla, hiç elle müdahale gerekmeden, baştan sona bir kontrol turu tamamlayabiliyor.
+- Bir adrese ulaşılamasa, cevap bozuk gelse, saklama alanı sorun çıkarsa veya haber verme kanalı çalışmasa bile sistem çökmüyor; sorunu not edip diğer işlerine devam ediyor.
+- Birden fazla adres izlendiğinde, birindeki sorun diğerlerinin kontrol edilmesini engellemiyor.
+- Bir adresin normalden çok daha yavaş cevap verdiği durumları da artık fark edebiliyor (geçmiş cevap sürelerini biriktirip kıyaslıyor).
+- Hata mesajlarının içinde yanlışlıkla bir adresin tam bilgisinin görünmesi engellendi — bu bilgi ileride bir erişim şifresi taşıyabileceği için özellikle önemliydi ve test sırasında fark edilip kapatıldı.
+- Windows'ta bazı programlarla (örneğin Not Defteri) düzenlenen ayar dosyalarının görünmez bir işaret yüzünden okunamaması sorunu da bu turda giderildi.
+
+### Neden böyle yaptık
+
+**Neden devralınan yarım işi silip baştan yazmadık:** İncelendiğinde çalışır durumda olduğu görüldü, sadece hiç sınanmamıştı. Silmek hem gereksiz emek kaybı olurdu hem de riski azaltmazdı — asıl güvence sınamaktan geliyor, yeniden yazmaktan değil. Bu yüzden koru-ve-denetle yolu seçildi.
+
+**Neden "referans bilginin gereksiz güncellenmesi" bu kadar önemliydi:** Bu sistemin bütün amacı, bir şey değiştiğinde bunu fark edip haber vermek. Eğer referans bilgi kendini sürekli tazelerse, sistem zamanla neyin "normal" olduğunu unutabilir ve aynı sorunu tekrar tekrar yeni bir şeymiş gibi bildirebilir. Bu, güvenilirliği doğrudan zedeleyen bir sorundu.
+
+**Neden dokuz aksilik ihtimalini tek tek kasıtlı olarak tetikledik:** "Muhtemelen çalışır" ile "denedim, çalıştığını gördüm" arasında büyük fark var. Bu sistem gözetimsiz, saatlik olarak kendi kendine çalışacak; kimse başında durup "şimdi ne oldu" diye bakmayacak. Bu yüzden aksilik durumlarının gerçekten güvenli bir şekilde ele alındığından emin olmak, gelecekte fark edilmeyen bir sessiz çökmeden çok daha değerliydi.
+
+**Neden adres bilgisinin gizlenmesi bir öncelik oldu:** Şu an izlenen adresler herkese açık, ama ileride bir erişim şifresi gerektiren bir adres eklenmesi mümkün. Böyle bir adres bir hata mesajının içinde görünürse, o şifre farkında olmadan hem ekrana hem haber kanalına hem saklama alanına sızabilirdi. Bu, küçük bir ayrıntı gibi görünse de geri dönüşü zor bir güvenlik sorunudur; bu yüzden fark edilir edilmez düzeltildi.
+
+### Sırada ne var
+
+Sistem artık elle çalıştırıldığında baştan sona doğru işliyor. Bir sonraki adım, bunu insan müdahalesinden tamamen bağımsız hale getirmek: sistemin belirli aralıklarla (saatte bir) kendiliğinden çalışmasını sağlayacak bir zamanlayıcı kurulacak. Bu kurulduğunda proje, yol haritasının üçüncü haftasının bitiş çizgisine ulaşmış olacak.
+
 ## Kayıt 7 — Sistem artık haber verebiliyor
 
 **Tarih:** 26 Ağustos 2026
