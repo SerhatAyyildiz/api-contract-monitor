@@ -3,19 +3,106 @@
 # Bu dosya GitHub'a bir talimattır: "şu sıklıkla şu programı çalıştır".
 # Sayesinde bilgisayarımızın açık olmasına gerek kalmaz.
 #
-# Bu dosya ne yapacak:
-# - Saatte bir kez ana akışı çalıştıracak
-# - Elle de tetiklenebilecek (test için)
-# - Gizli anahtarları GitHub'ın kasasından (Secrets) alacak
-# - Veritabanının turlar arasında kaybolmaması için bir çözüm içerecek
-#
-# Ne zaman yazılacak: Hafta 3, Gün 5-7
-#
-# Henüz yazılmadı - bu dosya şu an sadece bir yer tutucudur.
-# Aşağıdaki satırlar yorum halinde bırakıldı; içerik doldurulduğunda aktif olacak.
-#
-# name: API Sozlesme Denetimi
-# on:
-#   schedule:
-#     - cron: "0 * * * *"
-#   workflow_dispatch:
+# ÖNEMLİ - HAFIZA SORUNU VE ÇÖZÜMÜ:
+# GitHub her çalıştırmada sıfırdan boş bir bilgisayar kurar, iş bitince
+# siler. Sistemin hafızası (veritabanı) orada kalsaydı her turda her
+# adres "ilk kez görülüyor" sayılır ve hiçbir değişiklik asla tespit
+# edilemezdi. Bu yüzden tur sonunda veritabanı depoya geri yazılıyor;
+# bir sonraki tur onu buradan okuyup kaldığı yerden devam ediyor.
+
+name: API Sözleşme Denetimi
+
+on:
+  # Saat başı kendiliğinden çalışır.
+  # NOT: GitHub ücretsiz hesaplarda yoğun saatlerde bu tetiklemeyi
+  # geciktirebilir veya nadiren atlayabilir. Bir izleme sistemi için
+  # sorun değil; atlanan turu bir sonraki tur zaten yakalar.
+  schedule:
+    - cron: "0 * * * *"
+
+  # Elle tetiklemeye izin verir (GitHub'da Actions sekmesindeki düğme).
+  # Test için gerekli - saat başını beklemeden çalıştırabiliriz.
+  workflow_dispatch:
+
+# Depoya yazma izni. Veritabanını tur sonunda geri işleyebilmek için
+# gerekli. Başka hiçbir izin verilmiyor (en az yetki ilkesi).
+permissions:
+  contents: write
+
+# İki tur asla aynı anda çalışmasın. Bir tur sürerken yenisi tetiklenirse
+# sıraya alınır. Bu olmasaydı iki tur aynı anda veritabanına yazmaya
+# çalışıp birbirinin kaydını bozabilirdi.
+concurrency:
+  group: api-sozlesme-denetimi
+  cancel-in-progress: false
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+
+    # Bir tur takılırsa 10 dakikada kesilir; ücretsiz kota boşa gitmez.
+    timeout-minutes: 10
+
+    steps:
+      # 1) Deponun son halini getir.
+      - name: Depoyu getir
+        uses: actions/checkout@v4
+
+      # 2) Projenin ihtiyaç duyduğu Python sürümünü kur.
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # 3) Yardımcı paketleri kur (requirements.txt içindekiler).
+      - name: Bağımlılıkları kur
+        run: pip install -r requirements.txt
+
+      # 4) Testleri çalıştır.
+      # Bilinçli tercih: bozuk bir kod gönderildiyse sistem sessizce
+      # yanlış çalışmak yerine burada durur ve tur kırmızı yanar.
+      - name: Testleri çalıştır
+        run: python -m pytest tests -q
+
+      # 5) Asıl iş: kontrol turunu çalıştır.
+      # Gizli anahtarlar GitHub'ın kasasından (Secrets) ortam değişkeni
+      # olarak veriliyor; hiçbir dosyaya yazılmıyor ve ekrana basılmıyor.
+      # Kasada tanımlı değillerse sistem çökmez: kontrolü yapar, yalnızca
+      # bildirim gönderemediğini loglar.
+      - name: Kontrol turunu çalıştır
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m src.main
+
+      # 6) Hafızayı kalıcı kıl: veritabanı değiştiyse depoya geri yaz.
+      # "if: always()" sayesinde önceki adım hata verse bile o ana kadar
+      # birikmiş kayıtlar kaybolmaz.
+      - name: Veritabanını depoya işle
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Değişiklik yoksa boş commit atmaya çalışma - depo gereksiz
+          # kayıtla dolmasın.
+          #
+          # Önce "git add" yapıp sonra bakıyoruz. Sırası önemli: sadece
+          # "git diff" bakmak yetmezdi, çünkü o yalnızca depoda zaten
+          # kayıtlı olan dosyalardaki değişikliği görür. Veritabanı bir
+          # sebeple depodan düşerse (silinip yeniden oluşursa) bu kontrol
+          # onu "değişmemiş" sanıp sessizce atlar, hafıza da kalıcı olmazdı.
+          git add data/monitor.db
+
+          if git diff --cached --quiet -- data/monitor.db; then
+            echo "Veritabanı değişmedi, kayıt atlanıyor."
+            exit 0
+          fi
+
+          git commit -m "Otomatik kontrol turu: veritabanı güncellendi [skip ci]"
+
+          # Bu tur sürerken depoya başka bir değişiklik girmiş olabilir.
+          # Önce onu alıp üstüne yazıyoruz ki gönderim reddedilmesin.
+          git pull --rebase origin main
+          git push

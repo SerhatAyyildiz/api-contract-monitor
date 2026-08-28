@@ -14,11 +14,26 @@ venv/
 env/
 
 # --- Veritabanı ---
-# Kayıtlı şemalar ve kontrol geçmişi burada tutulacak.
-# Kişisel çalışma verisi olduğu için depoya girmez.
-# İkinci satır, klasörün depoda görünür kalmasını sağlayan işaretçi dosyayı korur.
+# Kayıtlı şemalar ve kontrol geçmişi burada tutulur.
+#
+# DİKKAT - bu kural Hafta 3, Gün 5-7'de bilinçli olarak değiştirildi:
+# Sistem artık GitHub'ın sunucularında saat başı kendiliğinden çalışıyor.
+# Orası her çalıştırmada sıfırdan kurulup siliniyor; veritabanı depoya
+# yazılmazsa sistem her turda her adresi "ilk kez görüyorum" sanar ve
+# hiçbir değişikliği asla tespit edemez. Bu yüzden veritabanı dosyası
+# artık depoya giriyor.
+#
+# Güvenlik notu: bu dosya yalnızca alan adları, tip bilgileri, yanıt
+# süreleri ve tespit edilen değişiklikleri tutar. Erişim anahtarı,
+# şifre veya kişisel veri içermez; bu, izin verilmeden önce dosyanın
+# tam içeriği taranarak doğrulandı.
+#
+# İlk satır klasördeki her şeyi gizler; sonraki iki satır yalnızca
+# işaretçi dosyaya ve veritabanına istisna tanır. Klasöre düşecek
+# başka bir geçici dosya yine gizli kalır.
 data/*
 !data/.gitkeep
+!data/monitor.db
 
 # --- Python'un ürettiği geçici dosyalar ---
 __pycache__/

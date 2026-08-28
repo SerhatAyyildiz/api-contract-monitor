@@ -998,6 +998,67 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G9 — GitHub Actions ile otomatikleştirme  (Hafta 3, Gün 5-7)
+
+**Tarih:** 27.08.2026
+
+**Yapılan işler:**
+- Bölüm 2.6 gereği "ne ters gidebilir" listesi (8 madde) çıkarıldı ve proje sahibi tarafından onaylandı
+- Kodlamadan önce iki kapsam kararı proje sahibine soruldu ve onaylandı: veritabanı kalıcılığı için **depoya işleme** yöntemi seçildi (Actions önbelleği yerine), çalışma sıklığı **saat başı** olarak korundu
+- **Veritabanının depoya girmesine izin verilmeden önce tam içeriği taranıp gizli bilgi içermediği kanıtlandı** (6 farklı tehlikeli desen arandı, hiçbiri bulunmadı)
+- `.gitignore` düzenlendi: yalnızca veritabanı dosyasına istisna tanındı; `.env`, `venv/` ve `data/` klasöründeki diğer dosyalar engellenmeye devam ediyor
+- `.github/workflows/monitor.yml` yazıldı — G1'de yalnızca yorum satırı içeren yer tutucuydu, bu turda çalışan yapılandırmaya dönüştürüldü
+- Saat başı zamanlayıcı (`0 * * * *`) ve elle tetikleme (`workflow_dispatch`) tanımlandı
+- Eşzamanlılık kilidi eklendi: iki tur asla aynı anda veritabanına yazamaz
+- Süre sınırı (10 dakika) eklendi: takılan bir tur ücretsiz kotayı tüketmez
+- Testler workflow'a dahil edildi — bozuk kod gönderilirse sistem sessizce yanlış çalışmak yerine kırmızı yanar
+- Sırlar GitHub kasasından ortam değişkeni olarak alınıyor; hiçbir dosyaya yazılmıyor
+- **Testler sırasında bir kusur bulundu ve düzeltildi:** veritabanının değişip değişmediğini anlayan kontrol yalnızca takip edilen dosyalara bakıyordu; dosya depodan düşerse (silinip yeniden oluşursa) kontrol onu "değişmemiş" sanıp sessizce atlayacak ve hafıza kalıcı olmayacaktı. Kontrol, takipsiz dosyaları da kapsayacak biçimde düzeltildi ve üç senaryoda ayrı ayrı sınandı
+- `src/` altındaki hiçbir dosyaya dokunulmadı; yeni bağımlılık eklenmedi
+- `.env` dosyası okunmadı, içeriği ekrana yazdırılmadı
+
+**Oluşturulan/değişen dosyalar:**
+- `.github/workflows/monitor.yml` — saat başı ve elle tetiklemeyle kontrol turunu çalıştırır, sonucu depoya işler
+- `.gitignore` — veritabanı dosyasına istisna tanındı, gerekçesi dosya içinde açıklandı
+- `data/monitor.db` — ilk kez depoya girecek (sistemin hafızası)
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | **Güvenlik:** veritabanı içeriğinde gizli bilgi var mı | Hiçbir desen eşleşmemeli | 6 desen (bot anahtarı, uzun anahtar, adres içi anahtar, tam adres, e-posta, yetkilendirme başlığı) tarandı, hepsi temiz | Geçti |
+| 2 | Workflow dosyasında sekme karakteri var mı | Olmamalı (YAML'de yasak) | Yok, yalnızca boşluk | Geçti |
+| 3 | Workflow'da zorunlu anahtarlar tam mı | 7 anahtar da bulunmalı | Yedisi de mevcut | Geçti |
+| 4 | `.gitignore` sonrası veritabanı görünüyor mu | Görünmeli | Görünüyor | Geçti |
+| 5 | **Bozarak:** `.env` hâlâ engelli mi | Engellenmeli | Engelleniyor | Geçti |
+| 6 | **Bozarak:** `venv/` hâlâ engelli mi | Engellenmeli | Engelleniyor | Geçti |
+| 7 | **Bozarak:** `data/` içindeki başka dosyalar sızıyor mu | İkisi de engellenmeli | Sahte geçici dosya ve sahte yedek dosyası oluşturuldu, ikisi de engellendi, sonra silindi | Geçti |
+| 8 | Workflow'un çalıştıracağı test komutu | 77 test geçmeli | 77/77 geçti | Geçti |
+| 9 | Workflow'un çalıştıracağı ana akış komutu | Hatasız bitmeli | "değişiklik yok", çıkış kodu 0 | Geçti |
+| 10a | Kayıt mantığı: dosya takipsizken | Kaydetmeli | **Eski mantık atlıyordu — hafıza kaybolurdu** | **Geçmedi** |
+| 10b | Aynı test, düzeltmeden sonra | Kaydetmeli | Kaydediyor | Geçti |
+| 11 | Kayıt mantığı: dosya değişmediğinde | Atlamalı (boş commit olmasın) | Atlıyor | Geçti |
+| 12 | Kayıt mantığı: dosya değiştiğinde | Kaydetmeli | Kaydediyor | Geçti |
+| 13 | **Güvenlik:** workflow dosyasında gerçek anahtar var mı | Olmamalı | Yok; sırlar yalnızca kasa referansıyla alınıyor | Geçti |
+
+*Not: 10a satırı bilerek tabloda bırakıldı. Bu test gerçek bir kusur ortaya çıkardı: kayıt kontrolü yalnızca takip edilen dosyalara bakıyordu. Kusur ve düzeltmesi, proje deposuna dokunulmadan ayrı bir geçici depoda üç senaryo halinde sınandı.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Workflow GitHub üzerinde HİÇ çalıştırılmadı.** Bu turda yapılan doğrulamaların tamamı yereldir. Gerçek çalıştırma, proje sahibinin GitHub kasasına iki sırrı tanımlamasını gerektiriyor; ajan GitHub arayüzüne erişemiyor. Aşağıdaki maddeler bu yüzden bekliyor.
+- **Elle tetikleme denenmedi** — Secrets tanımlandıktan sonra yapılacak.
+- **Bildirimin Actions üzerinden gerçekten geldiği doğrulanmadı** — Hafta 3 bitiş kriterinin can alıcı testi budur ve henüz yapılmadı.
+- **Saatlik zamanlayıcının kendiliğinden tetiklendiği görülmedi.** Bir sonraki saat başı beklenmelidir; bu oturum içinde kanıtlanamaz.
+- **Veritabanının Actions tarafından depoya işlendiği görülmedi** — ilk gerçek tur sonrası doğrulanacak.
+- **Actions loglarında gizli bilgi görünüp görünmediği kontrol edilmedi** — gerçek bir tur çalışmadan log oluşmuyor.
+- **Eşzamanlılık kilidinin gerçekten iki turu sıraya aldığı denenmedi** — bunun için iki turu kasıtlı çakıştırmak gerekir, yapılmadı.
+- **`git pull --rebase` çakışma yolunun gerçek bir çakışmada nasıl davrandığı denenmedi** — teorik olarak doğru kurgulandı, fiilen tetiklenmedi.
+
+**Denetçi kararı:** **Şartlı onaylandı** — saat başı çalışma için gerekli her şeyin hazırlandığı ve yerelde dikkatli biçimde test edildiği doğrulandı; güvenlik kontrolleri (sırların sızmaması, veritabanının temiz olması) sağlam bulundu. Şart: işin en önemli kısmı, yani sistemin GitHub üzerinde gerçekten çalışıp bildirim gönderdiğinin görülmesi henüz yapılmadı. Denetçinin tavsiyesi: adım şartlı kabul edilip commit atılsın, ardından gizli anahtarlar tanımlanıp sistem bir kez elle çalıştırılarak bildirimin gerçekten geldiği proje sahibi tarafından gözle doğrulansın. Hafta 3'ün gerçekten bitmiş sayılması buna bağlıdır.
+
+**Bekleyen düzeltmeler:**
+- **Şartın karşılanması bekleniyor:** Sistemin GitHub üzerinde gerçekten çalıştığı ve bildirimin telefona ulaştığı henüz doğrulanmadı. Gizli anahtarlar proje sahibi tarafından GitHub kasasına tanımlandı (denetim raporu yazılırken bu bilgi denetçide yoktu); geriye workflow'un elle tetiklenmesi, logların kontrolü ve bildirimin gözle doğrulanması kaldı. Bu doğrulama yapılana kadar Hafta 3 bitiş kriteri karşılanmış sayılmaz.
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
