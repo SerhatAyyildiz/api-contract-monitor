@@ -388,18 +388,20 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **✅ Gün 3-4 TAMAMLANDI** — sistem artık tek komutla uçtan uca çalışıyor, hiçbir hata durumunda çökmüyor (G8).
 
 #### Gün 5-7: GitHub Actions ile otomatikleştirme
-- [ ] `.github/workflows/monitor.yml` oluştur
-- [ ] Cron ayarı: saatte bir çalışacak şekilde (`0 * * * *`)
-- [ ] GitHub repo Settings → Secrets bölümüne token'ları ekle
-- [ ] Veritabanı kalıcılığı için çözüm: ya Actions cache ya da sonuçları repo'ya commit etme (ajan öneri sunmalı)
-- [ ] Workflow'u manuel tetikle (`workflow_dispatch`), log'ları kontrol et
-- [ ] Bildirimin gerçekten geldiğini doğrula
-- [ ] Commit: "GitHub Actions otomasyonu eklendi"
+- [x] `.github/workflows/monitor.yml` oluştur — *G9*
+- [x] Cron ayarı: saatte bir çalışacak şekilde (`0 * * * *`) — *G9; kuruldu ve kendiliğinden tetiklendiği doğrulandı, ancak GitHub ücretsiz hesaplarda zamanlayıcıyı seyrelttiği için pratikte günde birkaç kez çalışıyor (bkz. G9 EK)*
+- [x] GitHub repo Settings → Secrets bölümüne token'ları ekle — *proje sahibi tarafından*
+- [x] Veritabanı kalıcılığı için çözüm: ya Actions cache ya da sonuçları repo'ya commit etme (ajan öneri sunmalı) — *G9; iki seçenek gerekçeleriyle sunuldu, proje sahibi depoya işleme yöntemini seçti*
+- [x] Workflow'u manuel tetikle (`workflow_dispatch`), log'ları kontrol et — *G9 EK, proje sahibi tetikledi, loglar doğrulandı*
+- [x] Bildirimin gerçekten geldiğini doğrula — *G9 EK, referans kasıtlı bozuldu, bildirim telefona ulaştı*
+- [x] Commit: "GitHub Actions otomasyonu eklendi" — *G9, `c833a67`*
 
 **Ajan modu:** Default / Sonnet
 
 **Hafta 3 bitiş kriteri:**
 > Sisteme hiç dokunmadan, saatlik olarak otomatik çalışıyor ve bir değişiklik olduğunda Telegram'a bildirim düşüyor. Bu noktada proje **tamamlanmış** sayılır — sonraki hafta bonus.
+
+**✅ HAFTA 3 TAMAMLANDI** — bitiş ölçütü karşılandı (G9 EK): sistem proje sahibi hiç dokunmadan kendiliğinden çalıştı, referans şema kasıtlı bozulduğunda değişikliği yakaladı ve bildirim telefona ulaştı. Tek sapma: zamanlayıcı saat başı değil, GitHub'ın seyreltmesi nedeniyle günde birkaç kez tetikleniyor.
 
 ---
 
@@ -1054,8 +1056,45 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 **Denetçi kararı:** **Şartlı onaylandı** — saat başı çalışma için gerekli her şeyin hazırlandığı ve yerelde dikkatli biçimde test edildiği doğrulandı; güvenlik kontrolleri (sırların sızmaması, veritabanının temiz olması) sağlam bulundu. Şart: işin en önemli kısmı, yani sistemin GitHub üzerinde gerçekten çalışıp bildirim gönderdiğinin görülmesi henüz yapılmadı. Denetçinin tavsiyesi: adım şartlı kabul edilip commit atılsın, ardından gizli anahtarlar tanımlanıp sistem bir kez elle çalıştırılarak bildirimin gerçekten geldiği proje sahibi tarafından gözle doğrulansın. Hafta 3'ün gerçekten bitmiş sayılması buna bağlıdır.
 
-**Bekleyen düzeltmeler:**
-- **Şartın karşılanması bekleniyor:** Sistemin GitHub üzerinde gerçekten çalıştığı ve bildirimin telefona ulaştığı henüz doğrulanmadı. Gizli anahtarlar proje sahibi tarafından GitHub kasasına tanımlandı (denetim raporu yazılırken bu bilgi denetçide yoktu); geriye workflow'un elle tetiklenmesi, logların kontrolü ve bildirimin gözle doğrulanması kaldı. Bu doğrulama yapılana kadar Hafta 3 bitiş kriteri karşılanmış sayılmaz.
+**Bekleyen düzeltmeler:** yok — şart karşılandı (aşağıdaki ek bölüme bakınız).
+
+---
+
+#### G9 EK — Denetçi şartının karşılanması: GitHub üzerinde gerçek doğrulama
+
+**Tarih:** 29.08.2026
+
+> Bu bölüm, yukarıdaki kaydın yazıldığı anda henüz yapılamamış olan GitHub doğrulamasını belgeler. Yukarıdaki tablolara dokunulmadı; o tablolar yazıldıkları andaki durumu olduğu gibi yansıtıyor.
+
+**Yapılan işler:**
+- Gizli anahtarlar proje sahibi tarafından GitHub kasasına tanımlandı
+- Workflow commit edilip uzak depoya gönderildi (`c833a67`), böylece Actions çalıştırabilir hale geldi
+- Bildirim testi için referans şemaya, gerçek yanıtta bulunmayan bir alan kasıtlı olarak eklenip depoya gönderildi
+- Proje sahibi workflow'u elle tetikledi ve sonuçları raporladı
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 14 | Workflow GitHub üzerinde çalışıyor mu | Hatasız tamamlanmalı | Tamamlandı; "değişiklik yok" turu başarıyla işledi | Geçti |
+| 15 | Veritabanı turlar arasında korunuyor mu | Kayıtlar birikmeli | Kontrol kayıtları 18'den 24'e birikti; hafıza kaybolmadı | Geçti |
+| 16 | Veritabanı depoya işleniyor mu | Otomatik kayıt oluşmalı | Her turda otomatik kayıt oluştu | Geçti |
+| 17 | **Zamanlayıcı kendiliğinden tetikleniyor mu** | Elle müdahale olmadan tur başlamalı | Proje sahibi hiç dokunmadan üç tur çalıştı (28.08 21:59, 29.08 03:39 ve 10:56 UTC) | Geçti |
+| 18 | **ASIL TEST — bildirim gerçekten geliyor mu** | Telefona kritik bildirim düşmeli | Referans bozulduktan sonraki turda `1 bulgu tespit edildi` ve `bildirim gönderildi` loglandı; **proje sahibi bildirimin telefonuna ulaştığını doğruladı** | Geçti |
+| 19 | Değişiklik veritabanına yazıldı mı | `changes` tablosunda bulgu | `field_removed: actions_test_alani` kaydedildi | Geçti |
+| 20 | Referans şema kendini düzeltiyor mu | Bozuk alan referanstan çıkmalı | Çıktı; sistem bir sonraki tura temiz referansla devam etti | Geçti |
+| 21 | **G8 düzeltmesi gerçek ortamda çalışıyor mu** | Şema yalnızca değişiklikte kaydedilmeli | Kontrol kayıtları 8 satıra çıkarken şema kayıtları yalnızca 2 satır kaldı — düzeltme kanıtlandı | Geçti |
+| 22 | **Güvenlik:** Actions loglarında gizli anahtar görünüyor mu | Maskelenmiş olmalı | Loglarda `***` olarak göründü; proje sahibi ham log içinde anahtarların ilk karakterlerini de aratıp bulunamadığını doğruladı | Geçti |
+
+**Bu ek turda ortaya çıkan bulgu:**
+- **Her tur bir otomatik kayıt üretiyor.** "Değişiklik yoksa kayıt atlanır" mantığı pratikte hiç devreye girmiyor, çünkü her turda kontrol geçmişine yeni bir satır eklendiği için veritabanı gerçekten her seferinde değişiyor. Bir hata değil, seçilen tasarımın doğal sonucu; ancak depo zamanla otomatik kayıtlarla dolacak. `BACKLOG.md`'ye not düşüldü.
+- **Zamanlayıcı saat başı değil, çok daha seyrek çalışıyor.** Yaklaşık 24 saatte 24 tur beklenirken 3 tur gerçekleşti. Bu, GitHub'ın ücretsiz hesaplarda zamanlanmış işleri seyreltmesinden kaynaklanıyor ve projenin kontrolü dışında. İzleme amacı için kabul edilebilir; `BACKLOG.md`'ye not düşüldü.
+
+**Çalıştırılmayan/atlanan testler:**
+- **Eşzamanlılık kilidinin iki turu gerçekten sıraya aldığı denenmedi.** Bunun için iki turu kasıtlı çakıştırmak gerekirdi; yapılmadı.
+- **Çakışma çözme yolu (`git pull --rebase`) gerçek bir çakışmada sınanmadı.** Normal turlarda çalıştığı görüldü, ancak iki tur aynı anda depoya yazmaya çalıştığında ne olacağı fiilen denenmedi.
+- **Uzun süreli kararlılık gözlenmedi.** Sistem yaklaşık bir gün boyunca izlendi; haftalar boyunca sorunsuz çalışacağı bu sürede kanıtlanamaz.
+
+**Sonuç:** Denetçinin koyduğu şart karşılandı. **Hafta 3 bitiş kriteri sağlandı:** sisteme hiç dokunmadan otomatik çalışıyor ve bir değişiklik olduğunda Telegram'a bildirim düşüyor.
 
 ---
 

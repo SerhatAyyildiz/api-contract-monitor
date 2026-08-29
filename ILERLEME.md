@@ -5,6 +5,53 @@
 
 ---
 
+## Kayıt 9 — Sistem artık kendi kendine çalışıyor (Hafta 3 tamamlandı)
+
+**Tarih:** 29 Ağustos 2026
+**Aşama:** Hafta 3, Gün 5-7
+
+### Ne yaptık
+
+Şimdiye kadar sistem çalışıyordu ama birinin başlatması gerekiyordu. Bu adımda sisteme bir zamanlayıcı kuruldu: artık senin bilgisayarın kapalıyken bile, uzaktaki sunucularda kendiliğinden çalışıyor.
+
+Burada çözülmesi gereken sinsi bir sorun vardı. Uzaktaki sunucu her çalıştırmada sıfırdan kurulup iş bitince siliniyor — yani sistemin hafızası her seferinde uçuyordu. Böyle bırakılsaydı sistem her turda her adresi "ilk kez görüyorum" sanacak ve hiçbir değişikliği asla fark etmeyecekti. Çalışıyor gibi görünüp aslında hiçbir işe yaramayacaktı. Bunu önlemek için hafıza, her turun sonunda kalıcı olarak saklanacak şekilde ayarlandı.
+
+Sistemin gerçekten çalıştığı da kanıtlandı: hiç dokunulmadan üç kez kendiliğinden çalıştı, sonra kayıtlı bilgi kasıtlı olarak bozuldu ve sistem bu bozulmayı yakalayıp telefona bildirim gönderdi.
+
+### Sistem şimdi ne yapabiliyor
+
+- Kimse başlatmadan, kendi kendine çalışıyor. Bilgisayarın kapalı olması bir şeyi değiştirmiyor.
+- Her turda öğrendiğini kalıcı olarak hatırlıyor; bir sonraki tur kaldığı yerden devam ediyor.
+- Bir değişiklik olduğunda telefona bildirim gönderiyor — bu, gerçek bir bildirim alınarak doğrulandı.
+- Gizli anahtarlar kayıtlarda görünmüyor; bunlar kasada saklanıyor ve kayıtlara yalnızca yıldız işareti olarak yansıyor.
+- Bir önceki adımda düzeltilen "kayıtlı bilginin gereksiz yere tazelenmesi" sorununun gerçekten çözüldüğü de bu ortamda görüldü: kontrol geçmişi sekiz kayda çıkarken, referans bilgi yalnızca gerçek bir değişiklik olduğunda güncellendi.
+
+**Bu noktada yol haritasının üçüncü haftası tamamlandı ve proje "bitmiş" sayılıyor. Dördüncü hafta artık bonus.**
+
+### Neden böyle yaptık
+
+**Neden hafızayı kalıcı saklamayı seçtik, geçici bir alan yerine:** İki seçenek vardı. Geçici saklama alanı daha temiz duruyordu ama bir süre kullanılmazsa kendiliğinden siliniyor — üstelik bunu kimseye haber vermeden. Böyle bir durumda sistem çalışmaya devam eder ama hafızasını kaybettiği için hiçbir değişikliği fark edemez hale gelirdi ve bunu kimse anlamazdı. Sessizce yanlış çalışan bir izleme sistemi, hiç çalışmayandan daha tehlikelidir. Bu yüzden hafızanın kesin olarak korunduğu yöntem seçildi.
+
+**Neden hafızayı kalıcı yapmadan önce içeriğini taradık:** Kalıcı saklama, o bilginin herkese açık hale gelmesi anlamına geliyordu. Bu yüzden içine bir şifre veya erişim anahtarı karışmadığından emin olmak gerekiyordu. İçerik altı ayrı tehlike kalıbına karşı tarandı, temiz çıktı, ancak ondan sonra izin verildi.
+
+**Neden testleri de otomatik akışın içine koyduk:** Bozuk bir değişiklik gönderildiğinde sistemin sessizce yanlış çalışmasını istemedik. Artık her turda önce testler çalışıyor; bir şey bozulmuşsa sistem o noktada duruyor ve durum hemen görünür oluyor.
+
+**Neden bildirimi gerçekten telefona gönderterek test ettik:** Bir bildirim sisteminin "muhtemelen çalışıyor" olması yeterli değil. Kayıtlı bilgi kasıtlı olarak bozuldu, sistem bunu yakaladı ve bildirim telefona ulaştı. Ancak bu görüldükten sonra adım tamamlanmış sayıldı.
+
+### Dürüst notlar
+
+İki konuyu olduğu gibi yazmak gerekiyor:
+
+**Zamanlayıcı söz verildiği kadar sık çalışmıyor.** Saat başı çalışacak şekilde ayarlandı, ama yaklaşık bir gün içinde beklenen yirmi dört tur yerine üç tur gerçekleşti. Sebep bizim tarafımızda değil: ücretsiz hesaplarda bu tür zamanlanmış işler yoğunluğa göre seyreltiliyor. Bir izleme sistemi için bu kabul edilebilir; atlanan turu bir sonraki tur zaten yakalıyor. Yine de "saatlik" ifadesinin pratikte "günde birkaç kez" anlamına geldiği bilinmeli.
+
+**Her tur bir kayıt bırakıyor.** Hafıza her turda değiştiği için, "bir şey değişmediyse kayıt bırakma" önlemi pratikte hiç devreye girmiyor. Yani zamanla bu otomatik kayıtlar birikecek. Şu an bir soruna yol açmıyor, ama not edildi.
+
+### Sırada ne var
+
+Yol haritasına göre temel sistem bitti. Dördüncü hafta tamamen bonus ve iki başlıktan oluşuyor: bulunan değişiklikleri yapay zekâya yorumlatmak (bu değişiklik ciddi mi, ne yapmak gerekir gibi) ve projeyi tanıtan düzgün bir belge hazırlamak.
+
+Ayrıca yol haritasının çıktı ölçütlerinden biri henüz karşılanmadı: en az üç farklı adresin izlenmesi bekleniyor, şu an tek adres izleniyor. Sistem birden fazla adresi zaten destekliyor; yapılması gereken tek şey listeye yeni adres eklemek. Bu, dördüncü haftaya girmeden önce kısa bir iş olarak yapılabilir.
+
 ## Kayıt 8 — Sistem artık tek başına baştan sona çalışıyor
 
 **Tarih:** 27 Ağustos 2026
