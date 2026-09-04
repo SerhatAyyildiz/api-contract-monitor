@@ -8,6 +8,24 @@
       "headers": {},
       "timeout": 10,
       "enabled": true
+    },
+    {
+      "id": "github-repo",
+      "name": "GitHub Depo Bilgisi (CPython)",
+      "url": "https://api.github.com/repos/python/cpython",
+      "method": "GET",
+      "headers": {},
+      "timeout": 15,
+      "enabled": true
+    },
+    {
+      "id": "pypi-paket",
+      "name": "PyPI Paket Bilgisi (requests)",
+      "url": "https://pypi.org/pypi/requests/json",
+      "method": "GET",
+      "headers": {},
+      "timeout": 15,
+      "enabled": true
     }
   ]
 }

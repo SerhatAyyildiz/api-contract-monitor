@@ -1098,6 +1098,68 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G10 — İzlenen API sayısının üçe çıkarılması  (Hafta 3 sonrası, Bölüm 9 ölçütü)
+
+**Tarih:** 04.09.2026
+
+> **Neden bu görev:** Hafta 3 bitmiş olmasına rağmen Bölüm 9'daki "En az 3 farklı API izleniyor" çıktı ölçütü karşılanmamıştı. Bu madde Bölüm 10'daki feda listesinde değil, LLM katmanı ise feda edilebilirler arasında ikinci sırada. Zorunlu olan önce bitirildi.
+
+**Yapılan işler:**
+- Aday adresler varsayımla değil, **fiilen çekilip şemaları çıkarılarak** değerlendirildi
+- İki turda toplam **dokuz adres** denendi: yol haritası Bölüm 3'teki dört adayın tamamı (GitHub, CoinGecko, arXiv ve zaten izlenen JSONPlaceholder'ın karşılıkları) ve bunlara ek olarak üç aday daha (httpbin, PyPI, Open-Meteo). Denenen dokuz adresten dördü finale kaldı, ikisi gerekçeyle elendi (aşağıda)
+- Adayların **tip oynaklığı riski** ayrıca analiz edildi: sistem değerleri değil yapıyı izlediği için, sürekli değişen sayısal alanlar tam sayıdan ondalığa geçtiğinde sahte "tip değişti" alarmı üretebilir. Her adayın sayısal ve boş (null) alanları sayılarak bu risk ölçüldü
+- `config/apis.json`'a iki yeni kayıt eklendi; mevcut kayda dokunulmadı
+- GitHub adresi için zaman aşımı 15 saniye verildi (ölçümde diğerlerinden belirgin yavaş döndü)
+- Kod dosyalarına **hiç dokunulmadı** — sistem çoklu adresi zaten destekliyordu (G8'de dört adresle kanıtlanmıştı)
+- Yeni bağımlılık eklenmedi
+
+**Seçilen adresler:**
+- `github-repo` — GitHub depo bilgisi (CPython). 86 kök alan, 5 iç içe blok. Derin iç içe karşılaştırmayı gerçek veriyle sınıyor. Sayısal alanlarının tamamı sayaç olduğu için tip oynaklığı riski taşımıyor.
+- `pypi-paket` — PyPI paket bilgisi (requests). Yalnızca 6 kök alan ama 5 iç içe blok ve dizi içinde nesne barındırıyor. Böylece üç adres üç farklı yapı sınıfını temsil ediyor: düz / geniş-ve-iç içe / dar-ve-derin.
+
+**Elenen adaylar:**
+- **arXiv** — yol haritasında öneriliyor ancak **XML döndürüyor, JSON değil.** Fiilen test edilip görüldü. Eklenseydi her turda kalıcı `invalid_json` hatası ve sürekli yanlış alarm üretecekti.
+- **CoinGecko fiyat** — çalışıyor, ancak `bitcoin.usd` alanı tam sayı; fiyat ondalıklı bir değere düştüğü an sistem bunu kritik tip değişikliği sayıp yanlış alarm verecekti.
+- **Open-Meteo** — çalışıyor, ancak 11 sayısal alanın tamamı sürekli değişen hava verisi. Aynı risk, daha yüksek olasılıkla.
+
+**Oluşturulan/değişen dosyalar:**
+- `config/apis.json` — iki yeni API tanımı eklendi; toplam üç etkin adres
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Aday adresler gerçekten çalışıyor mu | Yanıt vermeli | İki turda dokuz adres denendi (ilk tur 4, ikinci tur 5); arXiv `invalid_json` döndürdü, diğer sekizi `ok` | Geçti |
+| 2 | Adayların şemaları birbirinden farklı mı | Farklı yapıda olmalı | 86 / 6 / 8 kök alan; üç ayrı yapı sınıfı | Geçti |
+| 3 | Finalist adaylar arka arkaya çağrıda kararlı mı | Şema değişmemeli | Dokuz adres arasından seçilen dört finalist ikişer kez çekildi, dördü de kararlı | Geçti |
+| 4 | **Tip oynaklığı risk analizi** (aynı dört finalist üzerinde) | Riskli alan sayısı ölçülmeli | CoinGecko 1, Open-Meteo 11, GitHub 14 (hepsi sayaç), PyPI 15 (meta veri) — seçim buna göre yapıldı | Geçti |
+| 5 | Config ayrıştırılabiliyor mu | 3 etkin kayıt | 3 kayıt, üçü de etkin, zorunlu alanlar tam | Geçti |
+| 6 | Otomatik testler | 77 test geçmeli | 77/77 geçti | Geçti |
+| 7 | İlk tur: yeni adresler tanınıyor mu | İkisi "ilk kez görülüyor" demeli | İkisi de referans olarak kaydedildi; eski adres "değişiklik yok" dedi | Geçti |
+| 8 | İlk turda bildirim gitti mi | Gitmemeli (ilk kez görülen bulgu üretmez) | Gitmedi | Geçti |
+| 9 | **İkinci tur: sahte alarm var mı** | Üçü de "değişiklik yok" | Üçü de temiz | Geçti |
+| 10 | **Üçüncü tur: kararlılık teyidi** | Üçü de "değişiklik yok" | Üçü de temiz; seçilen adreslerin sahte alarm üretmediği kanıtlandı | Geçti |
+| 11 | Üç adres için de şema kaydedildi mi | Üçü de kayıtlı olmalı | github-repo 86 alan, pypi-paket 6 alan, jsonplaceholder 8 alan | Geçti |
+| 12 | Kontrol geçmişine üç ayrı satır yazılıyor mu | Her turda 3 satır | Doğrulandı | Geçti |
+| 13 | **Bozarak:** ortadaki adres çökük, diğerleri etkileniyor mu | İkisi de normal işlenmeli | Baştaki ve sondaki adres etkilenmedi; bozuk adres yakalandı, tur normal bitti | Geçti |
+| 14 | **Güvenlik:** bozarak testte adres gizleniyor mu | Adres görünmemeli | `<adres gizlendi>` olarak maskelendi | Geçti |
+| 15 | Hata durumunda şema kaydediliyor mu | Kaydedilmemeli | github-repo şema sayısı 1'de kaldı | Geçti |
+| 16 | Bozarak test sonrası config geri yüklendi mi | Birebir aynı içerik | Geri yüklendi, sistem normal tura döndü | Geçti |
+
+**Çalıştırılmayan/atlanan testler:**
+- **GitHub üzerinde (Actions ortamında) üç adresle tur çalıştırılmadı.** Yerelde doğrulandı; Actions doğrulaması commit sonrası proje sahibinin tetiklemesiyle yapılacak.
+- **GitHub API'sinin saatlik istek sınırına (kimlik doğrulamasız 60 istek/saat) yaklaşıldığında ne olacağı denenmedi.** Mevcut kullanım günde birkaç tur olduğu için sınıra uzak; ancak tur sıklığı artırılırsa bu sınır `response_error` üretebilir.
+- **Uzun vadeli tip oynaklığı gözlenemedi.** Seçim analizle ve üç ardışık turla desteklendi, ancak haftalar içinde bu adreslerin hiç sahte alarm üretmeyeceği bu sürede kanıtlanamaz.
+- **PyPI'nin boş (null) alanlarının dolması durumu denenmedi.** Bu alanlar dolarsa sistem `type_changed` üretir; bu doğru davranıştır (gerçek bir yapı değişikliğidir) ancak fiilen tetiklenmedi.
+- **Yeni adreslerle gerçek bir bildirim gönderilmedi.** Bozarak testte bildirim taklit edildi; telefona gerçek mesaj gitmemesi için bilinçli tercih.
+
+**Denetçi kararı:** Onaylandı. Denetim, sistemin artık üç farklı adresi izlediğini ve Bölüm 9'un "en az 3 farklı API izleniyor" ölçütünün karşılandığını doğruladı. Koda hiç dokunulmadığı, yalnızca ayar dosyasına iki kayıt eklendiği denetçi tarafından dosya açılarak teyit edildi. Adreslerin rastgele değil, fiilen denenip "yanlış alarm üretir mi" diye ölçülerek seçilmesi iyi bir çalışma olarak değerlendirildi. **Denetçinin bulgusu:** kayıtta "kaç aday denendi" rakamı üç ayrı yerde üç farklı yazılmış, kafa karıştırıcı; sonucu etkilemiyor. Denetçinin önerdiği sonraki adım: GitHub üzerinde üç adresin gerçekten birlikte çalıştığını bir kez görmek.
+
+**Bekleyen düzeltmeler:**
+- **Sayı tutarsızlığı giderildi (bu turda).** Denetçinin yakaladığı hata doğruydu: "dört aday", "yedi aday" ve "dört aday" olarak üç farklı rakam yazılmıştı. Doğrusu: iki turda toplam **dokuz adres** denendi (ilk tur 4, ikinci tur 5); bunlardan **dört finaliste** kararlılık ve tip oynaklığı analizi uygulandı. Yukarıdaki "Yapılan işler" maddesi ile 1., 3. ve 4. test satırları buna göre düzeltildi. Seçim sonucu değişmedi.
+- **GitHub doğrulaması bekliyor:** Üç adresin Actions ortamında birlikte çalıştığı henüz görülmedi. Denetçinin önerdiği bu adım, commit ve gönderim sonrası proje sahibinin workflow'u elle tetiklemesiyle yapılacak.
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
