@@ -1156,7 +1156,42 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 **Bekleyen düzeltmeler:**
 - **Sayı tutarsızlığı giderildi (bu turda).** Denetçinin yakaladığı hata doğruydu: "dört aday", "yedi aday" ve "dört aday" olarak üç farklı rakam yazılmıştı. Doğrusu: iki turda toplam **dokuz adres** denendi (ilk tur 4, ikinci tur 5); bunlardan **dört finaliste** kararlılık ve tip oynaklığı analizi uygulandı. Yukarıdaki "Yapılan işler" maddesi ile 1., 3. ve 4. test satırları buna göre düzeltildi. Seçim sonucu değişmedi.
-- **GitHub doğrulaması bekliyor:** Üç adresin Actions ortamında birlikte çalıştığı henüz görülmedi. Denetçinin önerdiği bu adım, commit ve gönderim sonrası proje sahibinin workflow'u elle tetiklemesiyle yapılacak.
+- **GitHub doğrulaması yapıldı, madde kapandı** (aşağıdaki ek bölüme bakınız).
+
+---
+
+#### G10 EK — Üç adresin GitHub üzerinde doğrulanması
+
+**Tarih:** 04.09.2026
+
+> Bu bölüm, denetçinin önerdiği son adımı belgeler: üç adresin Actions ortamında gerçekten birlikte çalıştığının görülmesi. Yukarıdaki tablolara dokunulmadı.
+
+**Neden gerekliydi:** Doğrulama öncesi uzak depodaki veritabanı incelendiğinde, üç API'ye ait tüm kontrol kayıtlarının yerelde çalıştırılan turlardan geldiği (`11:31` damgalı), Actions'ın attığı son gerçek turun ise üç adres eklenmeden **önce** olduğu (`08:42`) görüldü. Yani Actions o ana kadar hep tek adresle çalışmıştı; G9'daki bildirim doğrulaması da tek adres üzerindeydi. Ayrıca GitHub API'si kimlik doğrulamasız isteklerde IP başına saatlik sınır uyguladığı ve Actions paylaşımlı IP'lerden çalıştığı için, bu adresin orada sahte `response_error` üretme ihtimali vardı — yerelde görülemeyecek bir risk.
+
+**Yapılan işler:**
+- Proje sahibi workflow'u GitHub arayüzünden elle tetikledi
+- Turun çıktısı ve sonucu proje sahibi tarafından raporlandı
+- Uzak depodaki veritabanı ayrıca çekilip Actions zaman damgalı kayıtlar doğrulandı
+- Hiçbir dosyaya dokunulmadı; bu bir gözlem turudur
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 17 | Actions turu tamamlanıyor mu | Yeşil bitmeli | Yeşil bitti | Geçti |
+| 18 | **Üç adres de Actions ortamında kontrol ediliyor mu** | `3 API, 3 başarılı, 0 hatalı` | Üçü de işlendi, tur bu özetle bitti | Geçti |
+| 19 | **GitHub adresi istek sınırına çarpıyor mu** (asıl risk) | `response_error` olmamalı | `github-repo: değişiklik yok (233 ms)` — sınıra çarpılmadı | Geçti |
+| 20 | Adresler Actions ortamında sahte alarm üretiyor mu | Bulgu olmamalı | Üçü de "değişiklik yok"; bulgu kaydı 0 | Geçti |
+| 21 | Bu turda bildirim gitti mi | Gitmemeli | Gitmedi (proje sahibi doğruladı) | Geçti |
+| 22 | **Turun gerçekten GitHub'da çalıştığı kanıtlanıyor mu** | Uzak veritabanında Actions damgalı kayıt | Üç adres için de `11:48:17` damgalı kayıt uzak depoda mevcut | Geçti |
+
+*Not: 22. test, yerelde çalıştırılan turlarla karışmaması için zaman damgası üzerinden yapıldı. Yanıt süreleri de yerelden belirgin farklı çıktı (38/233/26 ms; yerelde 271/546/261 ms) — bu da turun farklı bir ortamda çalıştığını ayrıca doğruluyor.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Yeni adreslerle gerçek bir bildirim Actions üzerinden gönderilmedi.** Bu turda hiçbir adres bulgu üretmediği için bildirim yolu tetiklenmedi. Bildirim mekanizmasının Actions ortamında çalıştığı G9'da tek adresle kanıtlanmıştı; üç adresli kurulumda ayrıca sınanmadı.
+- **GitHub istek sınırı bilinçli olarak zorlanmadı.** Tek turda sınıra çarpılmadığı görüldü, ancak tur sıklığı artarsa ne olacağı denenmedi.
+- **Uzun vadeli kararlılık gözlenmedi.** Tek bir Actions turu doğrulandı.
+
+**Sonuç:** Denetçinin önerdiği doğrulama tamamlandı. Üç adresin GitHub ortamında birlikte sorunsuz çalıştığı, sahte alarm üretmediği ve en riskli görülen adresin istek sınırına çarpılmadığı fiilen görüldü.
 
 ---
 
