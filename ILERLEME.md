@@ -5,6 +5,38 @@
 
 ---
 
+## Kayıt 10 — Sistem artık üç farklı yeri izliyor
+
+**Tarih:** 4 Eylül 2026
+**Aşama:** Hafta 3 sonrası, çıktı ölçütlerinin tamamlanması
+
+### Ne yaptık
+
+Hafta 3 bittiğinde sistem çalışıyordu ama yalnızca tek bir adresi izliyordu. Projenin "bitti" sayılması için konan şartlardan biri en az üç farklı yerin izlenmesiydi. Bu adımda iki yeni adres daha eklendi ve bu şart karşılandı.
+
+Adresler rastgele seçilmedi. Toplam dokuz aday gerçekten denendi, yanıtları incelendi ve her birinin "sahte alarm üretme" riski ölçüldü. Bu ölçüme göre en güvenli iki aday seçildi, riskli olanlar elendi.
+
+Ekleme sırasında beklenmedik bir durumla da karşılaşıldı: değişiklik GitHub'a gönderilmeye çalışıldığında, sistemin kendi kendine çalışan tarafı (zamanlayıcı) bu süre zarfında eski haliyle çalışmaya devam ettiği için iki taraf çakıştı. Hiçbir kayıt kaybedilmeden bu çakışma elle çözüldü.
+
+### Sistem şimdi ne yapabiliyor
+
+- Artık tek bir yeri değil, üç farklı yeri aynı turda kontrol ediyor.
+- Bu üç yerin yapısı birbirinden oldukça farklı — biri basit ve düz, biri geniş ve çok katmanlı, biri dar ama derin. Bu çeşitlilik bilerek seçildi; sistemin yalnızca tek tip bir veriyle değil, farklı biçimlerdeki bilgiyle de doğru çalıştığını göstermek için.
+- Bir yerdeki sorun hâlâ diğerlerini etkilemiyor — bu, üç gerçek adresle bir kez daha kanıtlandı.
+- Arka arkaya birden fazla tur çalıştırıldı ve hiçbirinde yanlış bir alarm çıkmadı; seçilen adreslerin güvenilir olduğu bu şekilde gösterildi.
+
+### Neden böyle yaptık
+
+**Neden dokuz aday denendi de sadece ikisi seçildi:** Sistem bir yerin döndürdüğü bilginin *yapısını* izliyor, içindeki *değerleri* değil. Bazı adaylarda bir değer (örneğin bir fiyat) zamanla türü değiştirebiliyordu — tam sayıyken ondalıklı hale gelebiliyordu. Böyle bir adres seçilseydi, sistem bunu her seferinde "yapı değişti" sanıp gereksiz yere haber verirdi. Bu riski görebilmek için adaylar gerçekten denenip, hangi bilgilerinin ne sıklıkla değişebileceği değerlendirildi.
+
+**Neden bir aday (XML döndüren bir servis) hiç düşünülmeden elendi:** Sistem yalnızca belirli bir veri biçimini anlıyor. Bu biçimde olmayan bir yanıt gelirse sistem onu her seferinde "okunamadı" olarak işaretler ve bu da sürekli yanlış bir uyarıya dönüşürdü.
+
+**Neden karşılaşılan çakışma kayıp yaşanmadan çözüldü:** Sistemin kendi kendine çalışan tarafı arka planda hiç durmadan işliyor. Bu yüzden elle yapılan bir değişikliğin gönderilmesiyle otomatik çalışmanın ürettiği kayıtlar aynı ana denk gelebiliyor. Böyle bir durumda iki tarafın da bilgisi değerlidir; hiçbiri yok sayılmadı, ikisi bir araya getirildi.
+
+### Sırada ne var
+
+Yol haritasının zorunlu bölümü artık tamamen bitti. Bundan sonrası tamamen bonus: bulunan değişiklikleri yapay zekâya yorumlatmak ve projeyi tanıtan bir belge hazırlamak.
+
 ## Kayıt 9 — Sistem artık kendi kendine çalışıyor (Hafta 3 tamamlandı)
 
 **Tarih:** 29 Ağustos 2026

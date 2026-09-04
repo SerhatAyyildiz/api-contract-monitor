@@ -468,7 +468,7 @@ Toplam ~1 saat/hafta. Kod okumak zorunda değilsin.
 ## 9. Çıktı Kriterleri ve CV Sunumu
 
 ### Proje "bitti" sayılması için gerekenler
-- [ ] En az 3 farklı API izleniyor
+- [x] En az 3 farklı API izleniyor — *G10; JSONPlaceholder, GitHub Depo, PyPI Paket*
 - [ ] Tüm değişiklik tipleri (Bölüm 6) tespit edilebiliyor
 - [ ] Hata durumlarında sistem çökmüyor
 - [ ] GitHub Actions ile otomatik çalışıyor
