@@ -1260,6 +1260,61 @@ Bu, izleme sistemlerinde **alarm yorgunluğu** denen soruna yol açar: sistem bo
 
 ---
 
+### G12 — slow_response yanlış alarm düzeltmesi
+
+**Tarih:** 07.09.2026
+
+> **Neden bu görev önce yapıldı:** G11'de tanıtım belgesi hazırlanırken proje sahibinin paylaştığı gerçek bildirim geçmişinde `slow_response` bulgularının çoğunun sahte alarm olduğu fark edildi. Proje sahibi LLM katmanından önce bu sorunun temizlenmesini istedi — yanlış alarm veren bir izleme sistemi güvenilmez olur.
+
+**Yapılan işler:**
+- Kodlamaya geçmeden önce veritabanındaki **gerçek** yanıt süresi dağılımı üç API için ayrı ayrı incelendi (119 başarılı kayıt); mutlak sınır rastgele seçilmedi, bu veriye dayandırıldı
+- Bulgu: üç API'nin hiçbirinde, hiçbir zaman 1 saniyeyi aşan bir gerçek yanıt yok — en yavaşı `github-repo`'nun 546 ms'si. Buna karşın üç gerçek yanlış alarmın hepsi çok daha düşük değerlerdeydi (299 ms, 326 ms, hatta 75 ms)
+- `src/comparator.py`'ye `ASGARI_YAVAS_SURE_MS = 1000` sabiti eklendi; `yanit_suresini_degerlendir` artık hem oran şartını (referansın 3 katı) hem mutlak şartı (1000 ms) birlikte arıyor — ikisi de sağlanmadıkça bulgu üretilmiyor
+- **Gerçek bir eksiklik fark edildi ve giderildi:** `yanit_suresini_degerlendir` için o ana kadar hiç otomatik test yokmuş (yalnızca elle/manuel doğrulanmıştı). Bu turda 8 test eklendi
+- Testler sırasında kendi yazdığım bir test hatalıydı (sınır değerinde `<` ile `<=` karıştırması); bu test düzeltildi, kod değil — kod baştan doğruydu
+- `tests/test_comparator.py`'nin üst açıklamasında "`slow_response` için test yok" diyen artık yanlış olan bir cümle güncellendi
+- Düzeltme **gerçek veritabanı kayıtlarıyla** doğrulandı: üç gerçek yanlış alarm olayı yeniden oynatılıp artık tetiklenmediği, 119 kaydın tamamı üretim mantığıyla (kayan 10'luk pencere) yeniden değerlendirilip sıfır bulgu ürettiği, ve gerçekten yavaş senaryoların (3000 ms, 1200 ms) hâlâ yakalandığı gösterildi
+- `BACKLOG.md` güncellendi: madde "bekleyen" bölümünden "tamamlananlar"a taşındı
+- `main.py`'nin çağrı imzası değişmediği için ayrıca bir değişiklik gerekmedi
+
+**Oluşturulan/değişen dosyalar:**
+- `src/comparator.py` — `ASGARI_YAVAS_SURE_MS` sabiti ve iki şartlı kontrol eklendi
+- `tests/test_comparator.py` — 8 yeni test + üst açıklama düzeltmesi
+- `BACKLOG.md` — madde tamamlananlara taşındı
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | Referans yokken bulgu üretilmiyor | `[]` | `[]` | Geçti |
+| 2 | Referans 0 iken çökmeden `[]` dönüyor | `[]` | `[]` | Geçti |
+| 3 | **Mutlak sınırın altında oran aşılsa bile bulgu yok** (üç gerçek olayın simülasyonu: 75/17, 299/91, 326/105) | `[]` | `[]` | Geçti |
+| 4 | Mutlak sınırın üzerinde ama oranı aşmayan yanıt bulgu üretmiyor | `[]` | `[]` | Geçti |
+| 5 | Hem mutlak hem oran aşılınca bulgu üretiliyor | 1 bulgu | 1 bulgu, doğru severity ve metin | Geçti |
+| 6 | Sınırın 1 ms altı asla yavaş sayılmıyor | `[]` | `[]` | Geçti |
+| 7 | Sınıra tam eşit + oran aşılıyorsa yakalanıyor (sınır dahil) | 1 bulgu | 1 bulgu | Geçti |
+| 8 | Gerçekten yavaş bir senaryo (3000 ms / 13 ms ort.) hâlâ yakalanıyor | 1 bulgu | 1 bulgu | Geçti |
+| 9 | **Gerçek veritabanı: üç yanlış alarm olayı yeniden oynatıldı** | Hiçbiri tetiklenmemeli | Üçü de artık `[]` döndü | Geçti |
+| 10 | **Gerçek veritabanı: 119 kaydın tamamı üretim penceresiyle yeniden değerlendirildi** | Sıfır bulgu (öncesi: 3) | jsonplaceholder 0, github-repo 0, pypi-paket 0 | Geçti |
+| 11 | **Simülasyon: pypi-paket 13ms→3000ms** | Yakalanmalı | Yakalandı | Geçti |
+| 12 | **Simülasyon: github-repo 220ms→1200ms** | Yakalanmalı | Yakalandı | Geçti |
+| 13 | Bölüm 2.9 düzen denetimi | İhlal olmaması | En uzun fonksiyon 22 satır, iç içe blok 1 kat | Geçti |
+| 14 | Tüm test paketi | 85 test | 85/85 geçti | Geçti |
+
+*Not: Test 6-7 sırasında kendi yazdığım ilk test hatalıydı — sınır değerinde (`ASGARI_YAVAS_SURE_MS` tam eşiği) yanlış beklenti kurmuştum. Kodun kendisi baştan doğruydu; test düzeltildi.*
+
+**Çalıştırılmayan/atlanan testler:**
+- **Yeni sınırın gerçek bir turda (GitHub Actions üzerinde) sınandığı görülmedi.** Değişiklik henüz gönderilmedi; bir sonraki gerçek Actions turunda hiç `slow_response` bulgusu üretilmemesi beklenir (mevcut yanıt sürenleri hâlâ 1 saniyenin çok altında).
+- **1000 ms sınırının uzun vadede (haftalar/aylar) doğru kaldığı gözlenemedi.** Karar 119 kayıtlık, birkaç günlük bir örnekleme dayanıyor. API'lerin davranışı zamanla değişirse (örn. github-repo doğal olarak yavaşlarsa) sınırın yeniden gözden geçirilmesi gerekebilir.
+- **Standart sapma tabanlı alternatif ölçüt denenmedi.** BACKLOG'da bir seçenek olarak anılmıştı; mutlak sınır daha basit olduğu ve mevcut veriyle tam uyumlu olduğu için tercih edildi.
+
+**Denetçi kararı:** Onaylandı. Denetim, düzeltmenin teknik olarak doğru olduğunu ve gerçek verilerle iyi test edildiğini doğruladı; yanlış alarm sorununun gerçekten çözüldüğü değerlendirildi. Denetim ayrıca `ILERLEME.md` kaydının bu noktada henüz açılmamış olduğunu bir eksiklik olarak işaretledi.
+
+**Bu ikinci nokta hakkında not:** `ILERLEME.md` kaydı, Bölüm 11'in başındaki "Görev akışının tamamı" tanımına göre (adım 5) **commit onayından sonra** yazılır; bu görev henüz Kapı 2'ye (commit onayı) ulaşmadı. Yani eksik değil, henüz sırası gelmemiş bir adım — G8'den beri her görevde bu sıra izlendi. Karışıklığı önlemek adına bu ayrım burada not düşüldü.
+
+**Bekleyen düzeltmeler:** yok — teknik bulgu yok. Kapı 2 (commit onayı) sonrası Bölüm 7 kutucukları ve `ILERLEME.md` kaydı normal sırayla eklenecek.
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:

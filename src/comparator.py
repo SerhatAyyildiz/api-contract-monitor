@@ -41,6 +41,18 @@ ONEM_DERECELERI = {
 # Yanıt süresi referansın kaç katını aşarsa "yavaş" sayılacağı (Bölüm 6).
 YAVAS_YANIT_KAT_SAYISI = 3
 
+# Bu süreden KISA yanıtlar hiçbir zaman "yavaş" sayılmaz - referans ne
+# kadar düşük olursa olsun. G11'de gerçek kullanımda üç yanlış alarm
+# bulundu (299 ms, 326 ms, hatta 75 ms) çünkü hızlı bir API'nin ortalaması
+# düşükken (örn. 17 ms) 3 katı eşiği de düşük kalıyor ve sıradan bir ağ
+# dalgalanması bile "yavaş" sanılıyordu. Üç API'nin (jsonplaceholder,
+# github-repo, pypi-paket) 119 gerçek çağrısı incelendi: en yavaş gerçek
+# yanıt bile 546 ms'de kaldı (github-repo, en büyük/en yavaş servis).
+# 1000 ms hem yuvarlak bir sayı hem de bu en yavaş gözlemin üzerinde
+# güvenli bir pay bırakıyor - gerçek bir yavaşlamayı kaçırmadan sıradan
+# dalgalanmayı eleyecek kadar yüksek (bkz. BACKLOG.md).
+ASGARI_YAVAS_SURE_MS = 1000
+
 
 def semalari_karsilastir(eski_sema, yeni_sema, yol=""):
     """İki şemayı karşılaştırıp bulunan tüm farkları tek bir liste olarak döndürür."""
@@ -151,8 +163,17 @@ def _bulgu_olustur(change_type, field, details):
 
 
 def yanit_suresini_degerlendir(guncel_sure_ms, referans_sure_ms):
-    """Güncel yanıt süresi referansın belirlenen katından fazlaysa slow_response bulgusu üretir."""
+    """Güncel yanıt süresi hem referansın katını hem mutlak alt sınırı aşıyorsa slow_response üretir.
+
+    İki şart birden gerekir: oran şartı (referansa göre görece yavaşlama)
+    ve mutlak şart (ASGARI_YAVAS_SURE_MS). Yalnızca oran yeterli olsaydı,
+    ortalaması çok düşük bir API'de sıradan bir ağ dalgalanması bile
+    "yavaş" sayılırdı - gerçekte bu G11'de üç kez yaşandı.
+    """
     if not referans_sure_ms:
+        return []
+
+    if guncel_sure_ms < ASGARI_YAVAS_SURE_MS:
         return []
 
     if guncel_sure_ms <= referans_sure_ms * YAVAS_YANIT_KAT_SAYISI:
