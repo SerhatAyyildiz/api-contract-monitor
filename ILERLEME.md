@@ -5,6 +5,37 @@
 
 ---
 
+## Kayıt 12 — Sistem artık boş yere bağırmıyor
+
+**Tarih:** 7 Eylül 2026
+**Aşama:** Hafta 4 öncesi, kalite düzeltmesi
+
+### Ne yaptık
+
+Bir önceki adımda tanıtım belgesi hazırlanırken, telefona gelen gerçek bildirim geçmişine bakılmıştı. O sırada rahatsız edici bir şey fark edilmişti: gönderilen bildirimlerin bir kısmı gereksizdi. Sistem, izlediği bir yerin normalden yavaş yanıt verdiğini düşünüp haber veriyordu, ama aslında ortada bir sorun yoktu — sıradan bir ağ dalgalanmasıydı.
+
+Bu adımda o sorun çözüldü. Yapay zekâ katmanına geçmeden önce bu düzeltmenin yapılması istendi, çünkü boş yere bağıran bir izleme sisteminin güvenilirliği kalmaz.
+
+Düzeltme yapılmadan önce, sisteme kayıtlı gerçek yanıt süreleri incelendi. Üç yerin de geçmişine bakıldığında, hiçbirinin şimdiye kadar bir saniyeyi aşan bir sürede yanıt vermediği görüldü. Buna karşın gereksiz bildirimlerin hepsi çok daha kısa sürelerde tetiklenmişti — biri hatta göz açıp kapayıncaya kadar süren bir yanıtta bile tetiklenmişti. Bu karşılaştırma, nereden bir sınır çizileceğini gösterdi: bir saniyenin altındaki hiçbir yanıt artık "yavaş" sayılmayacak.
+
+### Sistem şimdi ne yapabiliyor
+
+- Hızlı çalışan bir yerin ufak bir dalgalanmasını artık "sorun var" diye yorumlamıyor.
+- Buna karşın gerçekten yavaşlayan bir yer hâlâ yakalanabiliyor — bu, düzeltmeden sonra ayrıca sınanıp doğrulandı.
+- Daha önce gönderilmiş üç gereksiz bildirimin hepsi, yeni kuralla yeniden değerlendirildiğinde artık hiçbirinin tetiklenmediği gösterildi.
+
+### Neden böyle yaptık
+
+**Neden sınırı tahminle değil, kayıtlı gerçek verilere bakarak belirledik:** Rastgele bir sayı seçilseydi ya çok sıkı olup gerçek bir yavaşlamayı kaçırabilir ya da çok gevşek olup sorunu tam çözmeyebilirdi. Sistemin kendi geçmişi zaten elde olan en güvenilir bilgiydi; ona bakmak tahmin etmekten daha sağlamdı.
+
+**Neden bu, yapay zekâ katmanından önce yapıldı:** Sıradaki adımda sistem, bulduğu her değişikliği ayrıca yorumlatacak. Böyle bir düzeltme yapılmadan o adıma geçilseydi, gereksiz her "yavaş yanıt" uyarısı da boşuna yorumlatılacak, hem gereksiz kaynak harcanacak hem de asıl önemli uyarılar bu gürültünün içinde kaybolabilecekti.
+
+**Bu çalışma sırasında küçük bir kendi hatamızı da fark ettik:** Bu kuralın daha önce hiç otomatik olarak sınanmadığı, yalnızca elle kontrol edildiği görüldü. Bu boşluk da bu adımda kapatıldı.
+
+### Sırada ne var
+
+Artık yapay zekâ katmanına geçilebilir: sistemin bulduğu değişiklikleri yorumlatıp "bu ciddi mi, ne yapılmalı" diyen bir katman eklenecek.
+
 ## Kayıt 11 — Proje artık kendini anlatabiliyor
 
 **Tarih:** 7 Eylül 2026
