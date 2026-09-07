@@ -5,6 +5,54 @@
 
 ---
 
+## Kayıt 11 — Proje artık kendini anlatabiliyor
+
+**Tarih:** 7 Eylül 2026
+**Aşama:** Hafta 4, tanıtım belgesi
+
+### Ne yaptık
+
+Şimdiye kadar sistem çalışıyordu ama kendini anlatamıyordu. Projeye dışarıdan bakan biri ne işe yaradığını, nasıl kurulacağını veya nasıl ayarlanacağını anlayamazdı. Tanıtım belgesi bir iskeletten ibaretti ve içinde "sonra doldurulacak" diye bırakılmış dört boşluk vardı.
+
+Bu adımda o belge baştan yazıldı. Dört boşluğun dördü de dolduruldu: sistemin parçalarının birbirine nasıl bağlandığını gösteren bir akış şeması, adım adım kurulum talimatları, telefona gelen gerçek bir bildirimin görüntüsü ve ayarların ne anlama geldiğini açıklayan bir bölüm.
+
+Kurulum talimatları tahminle yazılmadı. Proje bilgisayarın başka bir yerine sıfırdan indirilip baştan sona kuruldu, her adım gerçekten denendi ve ancak çalıştığı görüldükten sonra yazıldı.
+
+### Sistem şimdi ne yapabiliyor
+
+Sistemin yeteneklerinde bir değişiklik yok — bu adımda hiçbir koda dokunulmadı. Kazanılan şey anlatılabilirlik:
+
+- Projeye ilk kez bakan biri ne işe yaradığını hemen görüyor; belge doğrudan somut bir örnekle başlıyor
+- Kurulum adımları denenmiş olduğu için takip eden kişi tıkanmıyor
+- Ayarların ne olduğu ve yeni bir adres eklemenin nasıl yapılacağı açıkça yazılı
+- Sistemin eksikleri de saklanmadan listelendi
+
+### Neden böyle yaptık
+
+**Neden tanıtım belgesini yapay zekâ katmanından önce yazdık:** Proje planında, zaman biterse nelerden vazgeçileceği sıralanmış. Yapay zekâ katmanı vazgeçilebilirler arasında, tanıtım belgesi ise asla vazgeçilmeyecekler arasında. Sıralamayı buna göre kurduk: kötü ihtimalde bile elde anlatılabilir, sunulabilir bir proje kalsın istedik.
+
+**Neden kurulum adımlarını gerçekten deneyerek yazdık:** Kurulum talimatı en kolay yanlış yazılan şeydir, çünkü yazan kişinin bilgisayarında zaten her şey kuruludur ve eksik bir adımı fark etmez. Talimatı takip eden kişi ise ilk engelde vazgeçer. Bu yüzden proje temiz bir yere indirilip sıfırdan kuruldu.
+
+**Bu deneme sırasında hoş bir şey keşfedildi:** Sistem, bildirim ayarları hiç yapılmadan da tam olarak çalışıyor. Kontrolünü yapıyor, karşılaştırmasını yapıyor, kaydını tutuyor; sadece haber gönderemiyor ve bunu sessizce geçiyor. Bu sayede belgede bildirim kurulumu zorunlu değil, isteğe bağlı bir adım olarak sunulabildi. Projeyi ilk kez deneyen biri hiçbir hesap açmadan, hiçbir anahtar almadan sistemi çalışır halde görebiliyor.
+
+**Neden iki yanlış bilgiyi düzelttik:** Belgede sistemin hâlâ ilk hafta aşamasında olduğu yazıyordu ve kullanılan teknolojiler arasında henüz yazılmamış olan yapay zekâ katmanı sayılıyordu. Olmayan bir yeteneği varmış gibi göstermek, özellikle bu proje bir iş başvurusunda sunulacağı için, doğru olmazdı.
+
+**Neden eksikleri de yazdık:** Belgeye "bilinen sınırlar" diye bir bölüm eklendi ve sistemin şu anki zayıf noktaları açıkça sıralandı. Bir projeyi inceleyen deneyimli biri eksikleri zaten fark eder; onları saklamaya çalışmak yerine bilerek listelemek daha güvenilir bir izlenim bırakır.
+
+### Bu adımda ortaya çıkan bir sorun
+
+Belgeye koymak için gerçek bildirim geçmişine bakılırken, gönderilen bildirimlerin bir kısmının gereksiz olduğu fark edildi. Sistem, izlediği yerin normalden yavaş yanıt verdiğini düşünüp haber veriyor; ancak "yavaş" ölçüsü fazla hassas ayarlanmış. İzlenen yer çok hızlı olduğunda, sıradan bir ağ dalgalanması bile bu ölçüyü aşıyor.
+
+Bu, izleme sistemlerinin bilinen bir hastalığı: sistem boş yere bağırırsa insan bir süre sonra bildirimleri okumayı bırakır, sonra gerçekten önemli bir uyarı geldiğinde o da gözden kaçar.
+
+Sorun bu adımda düzeltilmedi, çünkü bu adım bir belge çalışmasıydı ve kapsam dışına çıkmak istemedik. Ancak hem sonraya bırakılanlar listesine hem de tanıtım belgesinin eksikler bölümüne çözüm önerisiyle birlikte yazıldı.
+
+### Sırada ne var
+
+Projenin zorunlu kısmı tamamen bitti. Geriye tek bonus iş kaldı: bulunan değişiklikleri yapay zekâya yorumlatmak — "bu değişiklik ciddi mi, neyi etkiler, ne yapmak gerekir" gibi bir yorum eklemek.
+
+Ayrıca yukarıda anlatılan yanlış alarm sorunu, kısa bir düzeltme olarak yapay zekâ katmanından önce ele alınabilir.
+
 ## Kayıt 10 — Sistem artık üç farklı yeri izliyor
 
 **Tarih:** 4 Eylül 2026

@@ -421,7 +421,7 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
 **Ajan modu:** Plan modu → Default
 
 #### Gün 4-5: Dokümantasyon
-- [ ] `README.md` yaz. İçermesi gerekenler:
+- [x] `README.md` yaz. İçermesi gerekenler: — *G11, yedi maddenin tamamı yazıldı*
   - Problem tanımı (neden bu proje var)
   - Çözüm özeti
   - Mimari diyagramı (basit bir akış şeması)
@@ -429,8 +429,8 @@ Ajan `comparator.py` yazarken bu listenin hepsini kapsamalıdır:
   - Kurulum adımları (adım adım, çalıştırılabilir komutlarla)
   - Örnek çıktı (Telegram bildiriminin ekran görüntüsü)
   - Konfigürasyon açıklaması
-- [ ] `.env.example` güncel mi kontrol et
-- [ ] Kod içindeki gereksiz `print()` ve yorumları temizle
+- [x] `.env.example` güncel mi kontrol et — *G11'de kontrol edildi: üç anahtar adı doğru, değerler boş. Ancak yorum satırlarında "Hafta 3'te doldurulacak" / "Hafta 4'te doldurulacak" ifadeleri kaldı; o haftalar geçtiği için bu ifadeler eskimiş durumda*
+- [ ] Kod içindeki gereksiz `print()` ve yorumları temizle — *G11'de incelendi ama YAPILMADI: 16 print satırı var, hiçbiri başıboş değil, hepsi dosyalar doğrudan çalıştırıldığındaki gösterim bölümlerinde. `fetcher.py` kendi içinde bu bölümün main.py sonrası kaldırılabileceğini not düşmüş. Kod değişikliği gerektirdiği için G11'in (belge görevi) kapsamı dışında bırakıldı*
 
 **Ajan modu:** Default / Sonnet
 
@@ -473,7 +473,7 @@ Toplam ~1 saat/hafta. Kod okumak zorunda değilsin.
 - [ ] Hata durumlarında sistem çökmüyor
 - [ ] GitHub Actions ile otomatik çalışıyor
 - [ ] Bildirimler geliyor
-- [ ] README eksiksiz
+- [x] README eksiksiz — *G11*
 - [ ] Sırlar repo'da açıkta değil
 - [ ] Testler yazılmış ve geçiyor
 
