@@ -1195,6 +1195,71 @@ Her görev için aşağıdaki şablon kullanılır. Görevler **birbirine karı�
 
 ---
 
+### G11 — README yazımı  (Hafta 4, Gün 4-5)
+
+**Tarih:** 04.09.2026
+
+> **Neden bu görev önce yapıldı:** Bölüm 10'daki feda sırası gereği. LLM katmanı feda edilebilirler arasında ikinci sırada, README ise "asla feda edilmeyecekler" listesinde. Zaman biterse elde tanıtılabilir bir proje kalması için README önceliklendirildi. Ayrıca Bölüm 9'un çıktı ölçütlerinden geriye kalan tek madde buydu.
+
+**Yapılan işler:**
+- **Kurulum adımları tahminle değil, fiilen sınanarak yazıldı:** depo temiz bir klasöre klonlanıp sıfırdan kurulum yapıldı (klon → sanal ortam → bağımlılıklar → testler → çalıştırma). Test klonu sonra silindi, proje klasörü etkilenmedi
+- **Sınama sırasında önemli bir bulgu çıktı:** sistem `.env` dosyası olmadan da tam çalışıyor — kontrol yapıyor, karşılaştırıyor, kaydediyor; yalnızca bildirim gönderemiyor ve bunu sessizce geçiyor. Bu sayede README'de Telegram kurulumu **isteğe bağlı** bir adım olarak sunuldu; yeni gelen biri hiçbir anahtar almadan projeyi çalışır halde görebiliyor
+- README baştan yazıldı; mevcut iskeletteki dört eksik bölüm (mimari akış şeması, kurulum adımları, örnek bildirim, yapılandırma açıklaması) dolduruldu
+- Mimari şema için Mermaid kullanıldı — GitHub bunu README içinde doğrudan çiziyor, ayrı görsel dosyası gerekmiyor
+- Örnek bildirim metni uydurulmadı; gerçek `notifier.py` çağrılarak üretildi
+- `docs/` klasörü açıldı ve proje sahibinin ekleyeceği ekran görüntüsü için açıklama dosyası kondu
+- **İki yanlış bilgi düzeltildi:** durum satırı hâlâ "Yapım aşamasında (Hafta 1 / 4)" diyordu; teknoloji listesinde "LLM API" yazıyordu ama o katman henüz yazılmadı. İkincisi bilinçli olarak listeden çıkarıldı — olmayan bir yeteneği varmış gibi göstermemek için
+- BACKLOG'daki üç bekleyen madde README'ye "Bilinen sınırlar" başlığı altında dürüstçe yazıldı
+- `src/` altına ve yapılandırmaya hiç dokunulmadı; bu bir belge işidir
+
+**Oluşturulan/değişen dosyalar:**
+- `README.md` — baştan yazıldı; 13 bölüm, kurulum adımları sınanmış komutlarla
+- `docs/README.md` — **yeni**; görsel klasörünün ne beklediğini açıklar
+
+**Çalıştırılan testler:**
+| # | Test | Beklenen | Gerçekleşen | Sonuç |
+|---|---|---|---|---|
+| 1 | **Temiz klonda kurulum:** depo klonlanabiliyor mu | Klon başarılı | Klonlandı; `data/monitor.db` de birlikte geldi | Geçti |
+| 2 | **Temiz klonda:** sanal ortam kuruluyor mu | Kurulmalı | Kuruldu | Geçti |
+| 3 | **Temiz klonda:** bağımlılıklar kuruluyor mu | Üç paket | requests, python-dotenv, pytest kuruldu | Geçti |
+| 4 | **Temiz klonda:** testler geçiyor mu | 77 test | 77/77 geçti | Geçti |
+| 5 | **Temiz klonda, `.env` YOKKEN sistem çalışıyor mu** | Çökmemeli | Üç adres kontrol edildi, çıkış kodu 0 | Geçti |
+| 6 | `.env` yokken bildirim yolu ne diyor | Çökmeden `ayar_eksik` | `ayar_eksik` döndü, istisna yok | Geçti |
+| 7 | README'de geçen 12 dosya yolu gerçekten var mı | Hepsi var olmalı | 12/12 doğrulandı | Geçti |
+| 8 | `analyzer.py` gerçekten boş mu (README öyle iddia ediyor) | 0 fonksiyon | 0 fonksiyon — iddia doğru | Geçti |
+| 9 | README'deki timeout değerleri config ile uyuşuyor mu | Uyuşmalı | github-repo 15 sn — doğru | Geçti |
+| 10 | README'deki cron ifadesi workflow ile uyuşuyor mu | `0 * * * *` | Birebir aynı | Geçti |
+| 11 | README "mesaj düz metindir" diyor — doğru mu | `parse_mode` kullanılmamalı | Kodda hiç geçmiyor — iddia doğru | Geçti |
+| 12 | Örnek bildirim metni gerçek mi | Kodun ürettiğiyle aynı olmalı | `notifier.py` çağrılarak üretildi, birebir kopyalandı | Geçti |
+| 13 | Markdown kod blokları dengeli mi | Çift sayıda işaret | 22 işaret (dengeli), 1 mermaid bloğu | Geçti |
+| 14 | Görsel yolu gitignore tarafından engelleniyor mu | Engellenmemeli | Serbest | Geçti |
+| 15 | Testler hâlâ geçiyor mu (belge değişikliği sonrası) | 77 test | 77/77 geçti | Geçti |
+| 16 | **Gerçek bildirim geçmişi incelendi** (proje sahibinin ekran görüntüsü üzerinden) | Bildirimlerin anlamlı olması | **Dört bildirimin ikisi gereksiz çıktı** — aşağıdaki bulguya bakınız | **Bulgu** |
+
+**Bu turda ortaya çıkan bulgu — `slow_response` yanlış alarm üretiyor:**
+
+Proje sahibinin paylaştığı gerçek bildirim geçmişinde, gönderilen dört bildirimden ikisinin gereksiz olduğu görüldü (02.09 ve 03.09 tarihli "yavaş yanıt" uyarıları). Veritabanından doğrulandı:
+
+- `slow_response` eşiği "geçmiş ortalamanın 3 katı" olarak sabit
+- jsonplaceholder yanıt süreleri 21–297 ms arasında oynuyor, ortanca 107 ms, 44 kaydın 18'i 100 ms altında
+- Ortalama 91 ms'ye düştüğünde eşik 273 ms'ye iniyor; bir web servisinin 299 ms'de yanıt vermesi ise tamamen normal
+- Sonuç: sıradan ağ dalgalanması "yavaş yanıt" olarak bildiriliyor
+
+Bu, izleme sistemlerinde **alarm yorgunluğu** denen soruna yol açar: sistem boş yere bağırırsa kullanıcı bildirimleri okumayı bırakır ve gerçek kritik alarm da gözden kaçar. Sistemi bozmuyor, bu yüzden bu turda düzeltilmedi (G11 bir belge görevidir); `BACKLOG.md`'ye çözüm önerileriyle birlikte yazıldı ve README'nin "Bilinen sınırlar" bölümünde dürüstçe belirtildi.
+
+**Çalıştırılmayan/atlanan testler:**
+- **Mermaid diyagramının GitHub'da gerçekten çizildiği görülmedi.** Sözdizimi ve blok dengesi yerelde kontrol edildi, ancak GitHub'ın çizimi ancak push sonrası görülebilir.
+- **Ekran görüntüsü henüz eklenmedi.** `docs/ornek-bildirim.png` bağlantısı README'de duruyor ama dosya yok; proje sahibi ekleyecek. Dosya eklenene kadar o bölümde kırık görsel görünecektir.
+- **"30 saniye testi" ajan tarafından yapılamaz.** README'yi ilk kez okuyan birinin projeyi anlayıp anlamadığı ancak proje sahibi veya üçüncü bir kişi tarafından değerlendirilebilir.
+- **Kurulum adımları yalnızca Windows/Git Bash ortamında sınandı.** macOS ve Linux için yazılan etkinleştirme komutları standart olmakla birlikte o ortamlarda fiilen denenmedi.
+- **README'deki dış bağlantılar (BotFather, userinfobot) tıklanarak denenmedi.**
+
+**Denetçi kararı:** 
+
+**Bekleyen düzeltmeler:** 
+
+---
+
 ## 12. Ajan Oturumu Başlangıç Şablonu
 
 Her yeni oturumda ajana şunu ver:
